@@ -30,6 +30,8 @@ public class DBHelper extends SQLiteOpenHelper {
     final static String SHORTDESC = "ShortDesc";
     final static String LONGDESC = "LongDesc";
     final static String TIMENORM = "TimeNorm";
+    final static String TABLE_SERVICECATALOG = "ServiceCatalog";
+    final static String TABLE_WORKS = "Works";
 
 
     /**
@@ -116,7 +118,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public void openDataBase() throws SQLException {
         //открываем БД
         String myPath = DB_PATH + DB_NAME;
-        myDB = SQLiteDatabase.openDatabase(myPath, null, SQLiteDatabase.OPEN_READONLY);
+        myDB = SQLiteDatabase.openDatabase(myPath, null, SQLiteDatabase.OPEN_READWRITE);
     }
 
     @Override
@@ -135,11 +137,11 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     public Cursor query(String table, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy) {
-        return myDB.query("Works", null, null, null, null, null, null);
+        return myDB.query(TABLE_SERVICECATALOG, null, null, null, null, null, null);
     }
 
     public Cursor queryServices() {
-        return myDB.rawQuery("SELECT * FROM Works GROUP BY Service", null);
+        return myDB.rawQuery("SELECT * FROM "+TABLE_SERVICECATALOG+" GROUP BY "+SERVICE, null);
     }
 
 

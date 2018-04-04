@@ -32,7 +32,7 @@ public class SelectServiceActivity extends ListActivity {
         }
 
         c = dbHelper.queryServices();
-        SimpleCursorAdapter simpleCursorAdapter = new SimpleCursorAdapter(this, android.R.layout.simple_list_item_1, c, new String[]{"Service"}, new int[]{android.R.id.text1},0 );
+        SimpleCursorAdapter simpleCursorAdapter = new SimpleCursorAdapter(this, android.R.layout.simple_list_item_1, c, new String[]{DBHelper.SERVICE}, new int[]{android.R.id.text1},0 );
 
         setListAdapter(simpleCursorAdapter);
     }

@@ -39,7 +39,7 @@ public class AddWorkActivity extends AppCompatActivity {
         }
 
         Log.d("My", "onCreate: "+service);
-        cursor = dbHelper.getMyDB().rawQuery("SELECT * FROM works WHERE Service = '"+service+"'", null);
+        cursor = dbHelper.getMyDB().rawQuery("SELECT * FROM "+DBHelper.TABLE_SERVICECATALOG+" WHERE "+DBHelper.SERVICE+" = '"+service+"'", null);
 
         Log.d("My", "onCreate: "+cursor.getCount());
 
