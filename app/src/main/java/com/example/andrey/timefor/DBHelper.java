@@ -18,8 +18,19 @@ public class DBHelper extends SQLiteOpenHelper {
 
     private String DB_PATH = null;
     private static final String DB_NAME = "works.db";
+
+    public SQLiteDatabase getMyDB() {
+        return myDB;
+    }
+
     private SQLiteDatabase myDB;
     private final Context myContext;
+
+    final static String SERVICE = "Service";
+    final static String SHORTDESC = "ShortDesc";
+    final static String LONGDESC = "LongDesc";
+    final static String TIMENORM = "TimeNorm";
+
 
     /**
      * Конструктор
@@ -128,7 +139,7 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     public Cursor queryServices() {
-        return myDB.rawQuery("SELECT _id, Service FROM Works GROUP BY Service", null);
+        return myDB.rawQuery("SELECT * FROM Works GROUP BY Service", null);
     }
 
 

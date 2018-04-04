@@ -1,5 +1,6 @@
 package com.example.andrey.timefor;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.os.Bundle;
@@ -17,6 +18,8 @@ import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
 
+    private Cursor c;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,31 +31,12 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                Intent intent = new Intent(MainActivity.this, SelectServiceActivity.class);
+                startActivity(intent);
+                /*Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();*/
             }
         });
-
-        DBHelper dbHelper = new DBHelper(this);
-        try {
-            dbHelper.createDataBase();
-        } catch (IOException ioe) {
-            throw new Error("Unable to create database");
-        }
-        try {
-            dbHelper.openDataBase();
-        } catch (SQLException sqle) {
-            throw sqle;
-        }
-
-        Cursor c = dbHelper.queryServices();
-
-        ListView lv = findViewById(R.id.listView);
-
-        SimpleCursorAdapter simpleCursorAdapter = new SimpleCursorAdapter(this, android.R.layout.simple_list_item_1, c, new String[]{"Service"}, new int[]{android.R.id.text1},0 );
-
-        lv.setAdapter(simpleCursorAdapter);
-
 
     }
 
@@ -77,4 +61,6 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+
 }
