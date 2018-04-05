@@ -15,12 +15,13 @@ import android.widget.SimpleCursorAdapter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 
 public class AddWorkActivity extends AppCompatActivity {
 
     //final  static String SERVICE = "Service";
     Cursor cursor;
-    ArrayList<Integer> arrayList;
+    HashSet<Integer> arrayList;
     DBHelper dbHelper;
 
     @Override
@@ -30,7 +31,7 @@ public class AddWorkActivity extends AppCompatActivity {
         Intent intent = getIntent();
         String service = intent.getStringExtra(DBHelper.SERVICE);
 
-        arrayList = new ArrayList<>();
+        arrayList = new HashSet<>();
 
         dbHelper = new DBHelper(this);
         try {
@@ -81,9 +82,9 @@ public class AddWorkActivity extends AppCompatActivity {
     }
 
     public void  onClick (View view){
-        Date date = new Date();
         for (Integer i:arrayList){
-            dbHelper.getMyDB().rawQuery("INSERT INTO "+DBHelper.TABLE_WORKS+" (Date, WorkID) VALUES ('"+date.toString()+"', '"+i+"')",null );
+            String sql="INSERT INTO Works (Date, WorkID) VALUES (datetime('NOW'), "+i+")";
+            dbHelper.getMyDB().execSQL(sql);
         }
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);

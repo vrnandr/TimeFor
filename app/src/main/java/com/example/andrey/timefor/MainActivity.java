@@ -15,6 +15,8 @@ import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -52,7 +54,16 @@ public class MainActivity extends AppCompatActivity {
 
         }
         Cursor cursor = dbHelper.getMyDB().rawQuery("SELECT * FROM "+DBHelper.TABLE_WORKS, null);
+
+        HashMap<String, Integer>  hashMap = new HashMap<>();
+//TODO ОЛОЛЛОЛОЛОЛОЛО
+        while (cursor.moveToNext()){
+            hashMap.put(cursor.getString(cursor.getColumnIndex("Date")),cursor.getInt(cursor.getColumnIndex("WorkID")));
+        }
+
+
         ListView lv = findViewById(R.id.lv);
+
 
         SimpleCursorAdapter simpleCursorAdapter = new SimpleCursorAdapter(
                 this,
