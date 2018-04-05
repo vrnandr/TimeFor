@@ -13,11 +13,15 @@ import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
 
 public class AddWorkActivity extends AppCompatActivity {
 
     //final  static String SERVICE = "Service";
     Cursor cursor;
+    ArrayList<Integer> arrayList;
+    DBHelper dbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,7 +30,9 @@ public class AddWorkActivity extends AppCompatActivity {
         Intent intent = getIntent();
         String service = intent.getStringExtra(DBHelper.SERVICE);
 
-        DBHelper dbHelper = new DBHelper(this);
+        arrayList = new ArrayList<>();
+
+        dbHelper = new DBHelper(this);
         try {
             dbHelper.createDataBase();
         } catch (IOException ioe) {
@@ -48,10 +54,10 @@ public class AddWorkActivity extends AppCompatActivity {
 
         SimpleCursorAdapter simpleCursorAdapter = new SimpleCursorAdapter(
                 this,
-                android.R.layout.simple_list_item_multiple_choice,
+                android.R.layout.simple_list_item_2,
                 cursor,
-                new String[]{DBHelper.SHORTDESC},
-                new int[]{android.R.id.text1},
+                new String[]{DBHelper.SHORTDESC, DBHelper.TIMENORM},
+                new int[]{android.R.id.text1,android.R.id.text2},
                 0 );
         lv.setAdapter(simpleCursorAdapter);
 
@@ -61,6 +67,7 @@ public class AddWorkActivity extends AppCompatActivity {
                 view.setBackgroundColor(Color.GREEN);
                 Cursor cursor1 = (Cursor) adapterView.getItemAtPosition(i);
                 int id = cursor1.getInt(cursor1.getColumnIndex("_id"));
+                arrayList.add(id);
                 Log.d("My", "onItemClick: "+id);
 
             }
@@ -71,5 +78,15 @@ public class AddWorkActivity extends AppCompatActivity {
     public void onDestroy(){
         super.onDestroy();
         cursor.close();
+    }
+
+    public void  onClick (View view){
+        Date date = new Date();
+        for (Integer i:arrayList){
+            dbHelper.getMyDB().rawQuery("INSERT INTO "+DBHelper.TABLE_WORKS+" (Date, WorkID) VALUES ('"+date.toString()+"', '"+i+"')",null );
+        }
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+
     }
 }

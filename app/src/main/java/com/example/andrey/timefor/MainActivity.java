@@ -38,6 +38,33 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
+        DBHelper dbHelper = new DBHelper(this);
+        try {
+            dbHelper.createDataBase();
+        } catch (IOException ioe) {
+            throw new Error("Unable to create database");
+        }
+        try {
+            dbHelper.openDataBase();
+        } catch (SQLException sqle) {
+            throw sqle;
+
+        }
+        Cursor cursor = dbHelper.getMyDB().rawQuery("SELECT * FROM "+DBHelper.TABLE_WORKS, null);
+        ListView lv = findViewById(R.id.lv);
+
+        SimpleCursorAdapter simpleCursorAdapter = new SimpleCursorAdapter(
+                this,
+                android.R.layout.simple_list_item_2,
+                cursor,
+                new String[]{"Date", "WorkID"},
+                new int[]{android.R.id.text1,android.R.id.text2},
+                0 );
+        lv.setAdapter(simpleCursorAdapter);
+
+
+
     }
 
     @Override
