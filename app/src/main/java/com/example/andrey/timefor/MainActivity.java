@@ -11,11 +11,14 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.SimpleAdapter;
 import android.widget.SimpleCursorAdapter;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
@@ -56,23 +59,26 @@ public class MainActivity extends AppCompatActivity {
         Cursor cursor = dbHelper.getMyDB().rawQuery("SELECT * FROM "+DBHelper.TABLE_WORKS, null);
 
         HashMap<String, Integer>  hashMap = new HashMap<>();
+        HashSet<String> dateSet = new HashSet<>();
 //TODO ОЛОЛЛОЛОЛОЛОЛО
-        while (cursor.moveToNext()){
-            hashMap.put(cursor.getString(cursor.getColumnIndex("Date")),cursor.getInt(cursor.getColumnIndex("WorkID")));
+        // составление набора дат
+        while (cursor.moveToNext())
+            dateSet.add(cursor.getString(cursor.getColumnIndex("Date")));
+
+        //добавление суммы времени каждой даты
+        for (String date:dateSet){
+            cursor.moveToFirst();
+            int sum = 0;
+            while (cursor.moveToNext())
+                if (cursor.getString(cursor.getColumnIndex("Date")).equals(date))
+                    sum+=cursor.getInt(cursor.getColumnIndex("WorkID"));
+            hashMap.put(date,sum);
+
         }
 
-
         ListView lv = findViewById(R.id.lv);
-
-
-        SimpleCursorAdapter simpleCursorAdapter = new SimpleCursorAdapter(
-                this,
-                android.R.layout.simple_list_item_2,
-                cursor,
-                new String[]{"Date", "WorkID"},
-                new int[]{android.R.id.text1,android.R.id.text2},
-                0 );
-        lv.setAdapter(simpleCursorAdapter);
+        LvAdapter lvAdapter= new LvAdapter(hashMap);
+        lv.setAdapter(lvAdapter);
 
 
 

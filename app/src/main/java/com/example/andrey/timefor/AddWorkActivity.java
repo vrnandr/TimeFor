@@ -13,6 +13,7 @@ import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -67,7 +68,7 @@ public class AddWorkActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 view.setBackgroundColor(Color.GREEN);
                 Cursor cursor1 = (Cursor) adapterView.getItemAtPosition(i);
-                int id = cursor1.getInt(cursor1.getColumnIndex("_id"));
+                int id = cursor1.getInt(cursor1.getColumnIndex(DBHelper.TIMENORM));
                 arrayList.add(id);
                 Log.d("My", "onItemClick: "+id);
 
@@ -82,8 +83,11 @@ public class AddWorkActivity extends AppCompatActivity {
     }
 
     public void  onClick (View view){
-        for (Integer i:arrayList){
-            String sql="INSERT INTO Works (Date, WorkID) VALUES (datetime('NOW'), "+i+")";
+        Date date = new Date();
+        SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
+        String dateString = format.format(date);
+        for (Integer timeNorm:arrayList){
+            String sql="INSERT INTO Works (Date, WorkID) VALUES ('"+dateString+"', '"+timeNorm+"')";
             dbHelper.getMyDB().execSQL(sql);
         }
         Intent intent = new Intent(this, MainActivity.class);
