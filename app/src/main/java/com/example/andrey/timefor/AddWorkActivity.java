@@ -1,5 +1,6 @@
 package com.example.andrey.timefor;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -90,7 +91,9 @@ public class AddWorkActivity extends AppCompatActivity {
             String sql="INSERT INTO Works (Date, WorkID) VALUES ('"+dateString+"', '"+timeNorm+"')";
             dbHelper.getMyDB().execSQL(sql);
         }
+
         Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
 
     }

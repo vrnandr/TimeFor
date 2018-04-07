@@ -1,5 +1,7 @@
 package com.example.andrey.timefor;
 
+//TODO по логике WorkID это id работы а по факту это время работы
+
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -8,6 +10,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -20,10 +23,12 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
 
     private Cursor c;
+    private final String TAG = "My";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,43 +47,6 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();*/
             }
         });
-
-
-        DBHelper dbHelper = new DBHelper(this);
-        try {
-            dbHelper.createDataBase();
-        } catch (IOException ioe) {
-            throw new Error("Unable to create database");
-        }
-        try {
-            dbHelper.openDataBase();
-        } catch (SQLException sqle) {
-            throw sqle;
-
-        }
-        Cursor cursor = dbHelper.getMyDB().rawQuery("SELECT * FROM "+DBHelper.TABLE_WORKS, null);
-
-        HashMap<String, Integer>  hashMap = new HashMap<>();
-        HashSet<String> dateSet = new HashSet<>();
-//TODO ОЛОЛЛОЛОЛОЛОЛО
-        // составление набора дат
-        while (cursor.moveToNext())
-            dateSet.add(cursor.getString(cursor.getColumnIndex("Date")));
-
-        //добавление суммы времени каждой даты
-        for (String date:dateSet){
-            cursor.moveToFirst();
-            int sum = 0;
-            while (cursor.moveToNext())
-                if (cursor.getString(cursor.getColumnIndex("Date")).equals(date))
-                    sum+=cursor.getInt(cursor.getColumnIndex("WorkID"));
-            hashMap.put(date,sum);
-
-        }
-
-        ListView lv = findViewById(R.id.lv);
-        LvAdapter lvAdapter= new LvAdapter(hashMap);
-        lv.setAdapter(lvAdapter);
 
 
 
@@ -104,6 +72,56 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onResume (){
+        super.onResume();
+
+        DBHelper dbHelper = new DBHelper(this);
+        try {
+            dbHelper.createDataBase();
+        } catch (IOException ioe) {
+            throw new Error("Unable to create database");
+        }
+        try {
+            dbHelper.openDataBase();
+        } catch (SQLException sqle) {
+            throw sqle;
+
+        }
+        Cursor cursor = dbHelper.getMyDB().rawQuery("SELECT * FROM "+DBHelper.TABLE_WORKS, null);
+
+        Map<String, Integer>  hashMap = new HashMap<>();
+        Set<String> dateSet = new HashSet<>();
+
+        // составление набора дат
+        if (cursor.moveToFirst())
+            do
+                dateSet.add(cursor.getString(cursor.getColumnIndex("Date")));
+            while (cursor.moveToNext());
+
+
+
+
+        //добавление суммы времени каждой даты
+        for (String date:dateSet){
+            int sum = 0;
+            if (cursor.moveToFirst())
+                do{
+                    if (cursor.getString(cursor.getColumnIndex("Date")).equals(date))
+                        sum+=cursor.getInt(cursor.getColumnIndex("WorkID"));
+                } while (cursor.moveToNext());
+            hashMap.put(date,sum);
+        }
+
+        ListView lv = findViewById(R.id.lv);
+        LvAdapter lvAdapter= new LvAdapter(hashMap);
+        lv.setAdapter(lvAdapter);
+
+
+
+
     }
 
 
