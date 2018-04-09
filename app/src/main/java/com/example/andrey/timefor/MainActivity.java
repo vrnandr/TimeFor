@@ -18,8 +18,11 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.SimpleCursorAdapter;
+import android.widget.Toast;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -29,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Cursor c;
     private final String TAG = "My";
+    private DBHelper dbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +53,19 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
+        dbHelper = new DBHelper(this);
+        try {
+            dbHelper.createDataBase();
+        } catch (IOException ioe) {
+            throw new Error("Unable to create database");
+        }
+        try {
+            dbHelper.openDataBase();
+        } catch (SQLException sqle) {
+            throw sqle;
+
+        }
+
 
     }
 
@@ -67,29 +84,36 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        if (id == R.id.count) {
+            Toast.makeText(MainActivity.this, "Минут сегодня", Toast.LENGTH_SHORT).show();
         }
 
         return super.onOptionsItemSelected(item);
     }
 
     @Override
+    public boolean onPrepareOptionsMenu (Menu menu){
+        Date date = new Date();
+        SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
+        String dateString = format.format(date);
+        Cursor cursor = dbHelper.getMyDB().rawQuery("SELECT * FROM "+DBHelper.TABLE_WORKS+" WHERE Date='"+dateString+"'", null);
+        int sum = 0;
+        if (cursor.moveToFirst())
+            do{
+                if (cursor.getString(cursor.getColumnIndex("Date")).equals(dateString))
+                    sum+=cursor.getInt(cursor.getColumnIndex("WorkID"));
+            } while (cursor.moveToNext());
+        cursor.close();
+        menu.findItem(R.id.count).setTitle(Integer.toString(sum));
+
+
+        return true;
+    }
+
+    @Override
     public void onResume (){
         super.onResume();
 
-        DBHelper dbHelper = new DBHelper(this);
-        try {
-            dbHelper.createDataBase();
-        } catch (IOException ioe) {
-            throw new Error("Unable to create database");
-        }
-        try {
-            dbHelper.openDataBase();
-        } catch (SQLException sqle) {
-            throw sqle;
-
-        }
         Cursor cursor = dbHelper.getMyDB().rawQuery("SELECT * FROM "+DBHelper.TABLE_WORKS, null);
 
         Map<String, Integer>  hashMap = new HashMap<>();
@@ -101,9 +125,6 @@ public class MainActivity extends AppCompatActivity {
                 dateSet.add(cursor.getString(cursor.getColumnIndex("Date")));
             while (cursor.moveToNext());
 
-
-
-
         //добавление суммы времени каждой даты
         for (String date:dateSet){
             int sum = 0;
@@ -114,15 +135,19 @@ public class MainActivity extends AppCompatActivity {
                 } while (cursor.moveToNext());
             hashMap.put(date,sum);
         }
+        cursor.close();
 
         ListView lv = findViewById(R.id.lv);
         LvAdapter lvAdapter= new LvAdapter(hashMap);
         lv.setAdapter(lvAdapter);
-
-
-
+        invalidateOptionsMenu();
 
     }
 
+    @Override
+    public void onDestroy() {
+        dbHelper.close();
+        super.onDestroy();
+    }
 
 }
