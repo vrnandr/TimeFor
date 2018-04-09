@@ -6,11 +6,16 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.Toast;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class SelectServiceActivity extends ListActivity {
     private Cursor c;
@@ -42,15 +47,19 @@ public class SelectServiceActivity extends ListActivity {
         super.onListItemClick(l, v, position, id);
         Cursor cursor = (Cursor)getListAdapter().getItem(position);
         String service = cursor.getString(cursor.getColumnIndex(DBHelper.SERVICE));
-
+        Intent oldIntent = getIntent();
+        String count = oldIntent.getStringExtra(AddWorkActivity.COUNT);
         Intent intent = new Intent(this, AddWorkActivity.class);
         intent.putExtra(DBHelper.SERVICE, service);
+        intent.putExtra(AddWorkActivity.COUNT,count);
         startActivity(intent);
     }
 
     @Override
     public void onDestroy(){
-        super.onDestroy();
         c.close();
+        super.onDestroy();
     }
+
+
 }

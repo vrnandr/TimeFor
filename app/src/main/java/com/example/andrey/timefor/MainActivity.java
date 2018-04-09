@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private Cursor c;
     private final String TAG = "My";
     private DBHelper dbHelper;
+    Menu mMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +47,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(MainActivity.this, SelectServiceActivity.class);
+                String cnt = mMenu.findItem(R.id.count).toString();
+                intent.putExtra(AddWorkActivity.COUNT,cnt);
                 startActivity(intent);
                 /*Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();*/
@@ -73,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        mMenu =menu;
         return true;
     }
 

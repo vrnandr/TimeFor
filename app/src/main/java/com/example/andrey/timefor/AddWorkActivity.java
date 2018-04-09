@@ -24,10 +24,12 @@ import java.util.HashSet;
 
 public class AddWorkActivity extends AppCompatActivity {
 
-    //final  static String SERVICE = "Service";
+    final static String COUNT = "count";
     Cursor cursor;
-    HashSet<Integer> arrayList;
+    ArrayList<Integer> arrayList;
     DBHelper dbHelper;
+    Menu mMenu;
+    String count;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,8 +37,9 @@ public class AddWorkActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_work);
         Intent intent = getIntent();
         String service = intent.getStringExtra(DBHelper.SERVICE);
+        count = intent.getStringExtra(AddWorkActivity.COUNT);
 
-        arrayList = new HashSet<>();
+        arrayList = new ArrayList<>();
 
         dbHelper = new DBHelper(this);
         try {
@@ -60,10 +63,10 @@ public class AddWorkActivity extends AppCompatActivity {
 
         SimpleCursorAdapter simpleCursorAdapter = new SimpleCursorAdapter(
                 this,
-                android.R.layout.simple_list_item_2,
+                R.layout.add_work_item,
                 cursor,
                 new String[]{DBHelper.SHORTDESC, DBHelper.TIMENORM},
-                new int[]{android.R.id.text1,android.R.id.text2},
+                new int[]{R.id.desc,R.id.time},
                 0 );
         lv.setAdapter(simpleCursorAdapter);
 
@@ -106,6 +109,7 @@ public class AddWorkActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        mMenu = menu;
         return true;
     }
 
@@ -126,20 +130,7 @@ public class AddWorkActivity extends AppCompatActivity {
 
     @Override
     public boolean onPrepareOptionsMenu (Menu menu){
-        Date date = new Date();
-        SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
-        String dateString = format.format(date);
-        Cursor cursor = dbHelper.getMyDB().rawQuery("SELECT * FROM "+DBHelper.TABLE_WORKS+" WHERE Date='"+dateString+"'", null);
-        int sum = 0;
-        if (cursor.moveToFirst())
-            do{
-                if (cursor.getString(cursor.getColumnIndex("Date")).equals(dateString))
-                    sum+=cursor.getInt(cursor.getColumnIndex("WorkID"));
-            } while (cursor.moveToNext());
-        cursor.close();
-        menu.findItem(R.id.count).setTitle(Integer.toString(sum));
-
-
+        menu.findItem(R.id.count).setTitle(count);
         return true;
     }
 }
