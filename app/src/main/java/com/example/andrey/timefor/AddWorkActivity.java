@@ -61,16 +61,20 @@ public class AddWorkActivity extends AppCompatActivity {
         ListView lv = findViewById(R.id.lv);
         lv.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 
-        SimpleCursorAdapter simpleCursorAdapter = new SimpleCursorAdapter(
+        /*SimpleCursorAdapter simpleCursorAdapter = new SimpleCursorAdapter(
                 this,
                 R.layout.add_work_item,
                 cursor,
                 new String[]{DBHelper.SHORTDESC, DBHelper.TIMENORM},
                 new int[]{R.id.desc,R.id.time},
                 0 );
-        lv.setAdapter(simpleCursorAdapter);
 
-        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        lv.setAdapter(simpleCursorAdapter);*/
+
+        MyCursorAdapter cursorAdapter = new MyCursorAdapter(this, cursor,0);
+        lv.setAdapter(cursorAdapter);
+
+        /*lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 view.setBackgroundColor(Color.GREEN);
@@ -81,7 +85,7 @@ public class AddWorkActivity extends AppCompatActivity {
                 Log.d("My", "onItemClick: "+id);
 
             }
-        });
+        });*/
     }
 
     @Override
