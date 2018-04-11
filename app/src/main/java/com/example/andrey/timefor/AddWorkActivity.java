@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 
 public class AddWorkActivity extends AppCompatActivity {
@@ -71,7 +72,13 @@ public class AddWorkActivity extends AppCompatActivity {
 
         lv.setAdapter(simpleCursorAdapter);*/
 
-        MyCursorAdapter cursorAdapter = new MyCursorAdapter(this, cursor,0);
+        HashMap<Long, Boolean> isChkd = new HashMap<>();
+
+        /*for (Long i=0L; i<cursor.getCount();i++){
+            isChkd.put(i,false);
+        }*/
+
+        MyCursorAdapter cursorAdapter = new MyCursorAdapter(this, cursor, isChkd);
         lv.setAdapter(cursorAdapter);
 
         /*lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
