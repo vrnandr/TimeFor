@@ -8,7 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.SimpleCursorAdapter;
-
+import android.widget.TextView;
 
 
 /**
@@ -18,36 +18,18 @@ import android.widget.SimpleCursorAdapter;
 public class MySimpleCursorAdapter extends SimpleCursorAdapter {
     final String TAG ="My";
 
-    public MySimpleCursorAdapter(Context context, int layout, Cursor c, String[] from, int[] to, int flags) {
-        super(context, layout, c, from, to, flags);
+    public MySimpleCursorAdapter(Context context,Cursor c) {
+        super(context, R.layout.add_work_item, c, null, null, 0);
     }
 
     @Override
-    public View getView(final int position, final View convertView, final ViewGroup parent) {
-        View v = super.getView(position, convertView, parent);
-        v.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+    public View getView(int position, View convertView, ViewGroup parent) {
+        View view = super.getView(position, convertView, parent);
 
-                final View result;
 
-                if (convertView == null) {
-                    result = LayoutInflater.from(parent.getContext()).inflate(android.R.layout.simple_list_item_2, parent, false);
-                } else {
-                    result = convertView;
-                }
 
-                CheckBox ch =(CheckBox) result.findViewById(R.id.checkBox);
-                ch.setText("123");
 
-                Log.d(TAG, "onClick: is chekbox "+position);
-                if (view.getClass().equals(CheckBox.class)){
-                    Log.d(TAG, "onClick: is chekbox"+position);
-                }
-            }
-        });
 
-        return v;
-
+        return view;
     }
 }

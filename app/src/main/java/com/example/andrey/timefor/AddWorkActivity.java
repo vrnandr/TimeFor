@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 public class AddWorkActivity extends AppCompatActivity {
 
@@ -62,7 +63,7 @@ public class AddWorkActivity extends AppCompatActivity {
         ListView lv = findViewById(R.id.lv);
         lv.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 
-        /*SimpleCursorAdapter simpleCursorAdapter = new SimpleCursorAdapter(
+        /*SimpleCursorAdapter cursorAdapter = new SimpleCursorAdapter(
                 this,
                 R.layout.add_work_item,
                 cursor,
@@ -70,15 +71,20 @@ public class AddWorkActivity extends AppCompatActivity {
                 new int[]{R.id.desc,R.id.time},
                 0 );
 
-        lv.setAdapter(simpleCursorAdapter);*/
+        /*
+        lv.setAdapter(simpleCursorAdapter);
 
-        HashMap<Long, Boolean> isChkd = new HashMap<>();
+
 
         /*for (Long i=0L; i<cursor.getCount();i++){
             isChkd.put(i,false);
         }*/
 
-        MyCursorAdapter cursorAdapter = new MyCursorAdapter(this, cursor, isChkd);
+        List<Integer> idChkd = new ArrayList<>();
+
+        MyCursorAdapter cursorAdapter = new MyCursorAdapter(this, cursor, idChkd);
+        //MySimpleCursorAdapter cursorAdapter = new MySimpleCursorAdapter(this, cursor);
+
         lv.setAdapter(cursorAdapter);
 
         /*lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
