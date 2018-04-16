@@ -100,14 +100,23 @@ public class MainActivity extends AppCompatActivity {
         Date date = new Date();
         SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
         String dateString = format.format(date);
+        //TODO курсоры теже что и в onResume
         Cursor cursor = dbHelper.getMyDB().rawQuery("SELECT * FROM "+DBHelper.TABLE_WORKS+" WHERE Date='"+dateString+"'", null);
+        Cursor cursorIDs = dbHelper.getMyDB().rawQuery("SELECT "+DBHelper.ID+", "+DBHelper.TIMENORM+" FROM "+DBHelper.TABLE_SERVICECATALOG, null);
         int sum = 0;
         if (cursor.moveToFirst())
             do{
-                if (cursor.getString(cursor.getColumnIndex("Date")).equals(dateString))
-                    sum+=cursor.getInt(cursor.getColumnIndex("WorkID"));
+                Integer idWork = cursor.getInt(cursor.getColumnIndex("WorkID"));
+                if (cursorIDs.moveToFirst())
+                    do {
+                        if (cursorIDs.getInt(cursorIDs.getColumnIndex(DBHelper.ID))==idWork){
+                            sum+=cursorIDs.getInt(cursorIDs.getColumnIndex(DBHelper.TIMENORM));
+                            break;
+                        }
+                    } while (cursorIDs.moveToNext());
             } while (cursor.moveToNext());
         cursor.close();
+        cursorIDs.close();
         menu.findItem(R.id.count).setTitle(Integer.toString(sum));
 
 
@@ -119,6 +128,8 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
 
         Cursor cursor = dbHelper.getMyDB().rawQuery("SELECT * FROM "+DBHelper.TABLE_WORKS, null);
+        Cursor cursorIDs = dbHelper.getMyDB().rawQuery("SELECT "+DBHelper.ID+", "+DBHelper.TIMENORM+" FROM "+DBHelper.TABLE_SERVICECATALOG, null);
+        //Map<Integer, Integer> idMap =
 
         Map<String, Integer>  hashMap = new HashMap<>();
         Set<String> dateSet = new HashSet<>();
@@ -134,11 +145,20 @@ public class MainActivity extends AppCompatActivity {
             int sum = 0;
             if (cursor.moveToFirst())
                 do{
-                    if (cursor.getString(cursor.getColumnIndex("Date")).equals(date))
-                        sum+=cursor.getInt(cursor.getColumnIndex("WorkID"));
+                    if (cursor.getString(cursor.getColumnIndex("Date")).equals(date)){
+                        Integer idWork = cursor.getInt(cursor.getColumnIndex("WorkID"));
+                        if (cursorIDs.moveToFirst())
+                            do {
+                                if (cursorIDs.getInt(cursorIDs.getColumnIndex(DBHelper.ID))==idWork){
+                                    sum+=cursorIDs.getInt(cursorIDs.getColumnIndex(DBHelper.TIMENORM));
+                                    break;
+                                }
+                            } while (cursorIDs.moveToNext());
+                    }
                 } while (cursor.moveToNext());
             hashMap.put(date,sum);
         }
+        cursorIDs.close();
         cursor.close();
 
         ListView lv = findViewById(R.id.lv);

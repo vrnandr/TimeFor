@@ -30,6 +30,7 @@ public class DBHelper extends SQLiteOpenHelper {
     final static String SHORTDESC = "ShortDesc";
     final static String LONGDESC = "LongDesc";
     final static String TIMENORM = "TimeNorm";
+    final static String ID ="_id";
     final static String TABLE_SERVICECATALOG = "ServiceCatalog";
     final static String TABLE_WORKS = "Works";
 

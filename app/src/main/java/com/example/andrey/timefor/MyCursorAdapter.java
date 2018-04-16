@@ -24,10 +24,23 @@ public class MyCursorAdapter extends CursorAdapter {
     private List<Integer> posChkd;
     private List<Integer> idChkd;
     private String TAG ="My";
+    private OnMyLVItemClickListener lst;
 
-    public MyCursorAdapter(Context context, Cursor c, List<Integer> idChkd) {
+    class MyTag{
+        Integer position;
+        Integer id;
+        Integer time;
+        MyTag (Integer position, Integer id,Integer time){
+            this.position = position;
+            this.id = id;
+            this.time = time;
+        }
+    }
+
+    public MyCursorAdapter(Context context, Cursor c, List<Integer> idChkd, OnMyLVItemClickListener lst) {
         super(context, c, 0);
         this.idChkd= idChkd;
+        this.lst = lst;
         posChkd = new ArrayList<>();
         cursorInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
@@ -41,12 +54,18 @@ public class MyCursorAdapter extends CursorAdapter {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 Log.d(TAG, "onCheckedChanged: "+compoundButton.getTag()+" "+compoundButton.toString());
-                int pos = (Integer) checkBox.getTag();
+                MyTag myTag = (MyTag) checkBox.getTag();
+                lst.onMyLVItemClickListener(myTag.time);
                 if (b){
-                    if (!posChkd.contains(pos))
-                        posChkd.add(pos);
-                } else
-                    posChkd.remove((Object)pos);
+                    if (!posChkd.contains(myTag.position))
+                        posChkd.add(myTag.position);
+                    if (!idChkd.contains(myTag.id))
+                        idChkd.add(myTag.id);
+                } else{
+                    posChkd.remove((Object) myTag.position);
+                    idChkd.remove((Object)myTag.id);
+                }
+
             }
         });
 
@@ -63,7 +82,7 @@ public class MyCursorAdapter extends CursorAdapter {
         tvTime.setText(cursor.getString(cursor.getColumnIndex(DBHelper.TIMENORM)));
 
         CheckBox checkBox = view.findViewById(R.id.checkBox);
-        checkBox.setTag(cursor.getPosition());
+        checkBox.setTag(new MyTag(cursor.getPosition(),cursor.getInt(0),cursor.getInt(cursor.getColumnIndex(DBHelper.TIMENORM))));
 
         if (posChkd.contains(cursor.getPosition()))
             checkBox.setChecked(true);
