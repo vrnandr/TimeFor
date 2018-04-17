@@ -55,15 +55,17 @@ public class MyCursorAdapter extends CursorAdapter {
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 Log.d(TAG, "onCheckedChanged: "+compoundButton.getTag()+" "+compoundButton.toString());
                 MyTag myTag = (MyTag) checkBox.getTag();
-                lst.onMyLVItemClickListener(myTag.time);
+                //lst.onMyLVItemClickListener(myTag.time);
                 if (b){
                     if (!posChkd.contains(myTag.position))
                         posChkd.add(myTag.position);
                     if (!idChkd.contains(myTag.id))
                         idChkd.add(myTag.id);
+                    lst.onMyLVItemClickListener(myTag.time);
                 } else{
                     posChkd.remove((Object) myTag.position);
                     idChkd.remove((Object)myTag.id);
+                    lst.onMyLVItemClickListener(-myTag.time);
                 }
 
             }
