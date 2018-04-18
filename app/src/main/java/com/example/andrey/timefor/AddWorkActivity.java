@@ -1,29 +1,24 @@
 package com.example.andrey.timefor;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.SQLException;
-import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 
-public class AddWorkActivity extends AppCompatActivity {
+public class AddWorkActivity extends AppCompatActivity implements OnMyLVItemClickListener {
 
     final static String COUNT = "count";
     Cursor cursor;
@@ -31,6 +26,8 @@ public class AddWorkActivity extends AppCompatActivity {
     DBHelper dbHelper;
     Menu mMenu;
     String count;
+    final static String TAG = "My";
+    List<Integer> idChkd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +59,7 @@ public class AddWorkActivity extends AppCompatActivity {
         ListView lv = findViewById(R.id.lv);
         lv.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 
-        /*SimpleCursorAdapter simpleCursorAdapter = new SimpleCursorAdapter(
+        /*SimpleCursorAdapter cursorAdapter = new SimpleCursorAdapter(
                 this,
                 R.layout.add_work_item,
                 cursor,
@@ -70,15 +67,19 @@ public class AddWorkActivity extends AppCompatActivity {
                 new int[]{R.id.desc,R.id.time},
                 0 );
 
-        lv.setAdapter(simpleCursorAdapter);*/
+        /*
+        lv.setAdapter(simpleCursorAdapter);
 
-        HashMap<Long, Boolean> isChkd = new HashMap<>();
+
 
         /*for (Long i=0L; i<cursor.getCount();i++){
             isChkd.put(i,false);
         }*/
 
-        MyCursorAdapter cursorAdapter = new MyCursorAdapter(this, cursor, isChkd);
+        idChkd = new ArrayList<>();
+
+        MyCursorAdapter cursorAdapter = new MyCursorAdapter(this, cursor, idChkd, this);
+
         lv.setAdapter(cursorAdapter);
 
         /*lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -102,11 +103,14 @@ public class AddWorkActivity extends AppCompatActivity {
     }
 
     public void  onClick (View view){
+
+        //Log.d(TAG, "onClick: "+idChkd);
+
         Date date = new Date();
         SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
         String dateString = format.format(date);
-        for (Integer timeNorm:arrayList){
-            String sql="INSERT INTO Works (Date, WorkID) VALUES ('"+dateString+"', '"+timeNorm+"')";
+        for (Integer id:idChkd){
+            String sql="INSERT INTO Works (Date, WorkID) VALUES ('"+dateString+"', '"+id+"')";
             dbHelper.getMyDB().execSQL(sql);
         }
 
@@ -143,5 +147,13 @@ public class AddWorkActivity extends AppCompatActivity {
     public boolean onPrepareOptionsMenu (Menu menu){
         menu.findItem(R.id.count).setTitle(count);
         return true;
+    }
+
+    @Override
+    public void onMyLVItemClickListener(Integer addTime) {
+        Integer cnt = Integer.parseInt(count);
+        cnt+=addTime;
+        count= Integer.toString(cnt);
+        invalidateOptionsMenu();
     }
 }
