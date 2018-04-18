@@ -3,13 +3,18 @@ package com.example.andrey.timefor;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.SQLException;
+import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -59,41 +64,12 @@ public class AddWorkActivity extends AppCompatActivity implements OnMyLVItemClic
         ListView lv = findViewById(R.id.lv);
         lv.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 
-        /*SimpleCursorAdapter cursorAdapter = new SimpleCursorAdapter(
-                this,
-                R.layout.add_work_item,
-                cursor,
-                new String[]{DBHelper.SHORTDESC, DBHelper.TIMENORM},
-                new int[]{R.id.desc,R.id.time},
-                0 );
-
-        /*
-        lv.setAdapter(simpleCursorAdapter);
-
-
-
-        /*for (Long i=0L; i<cursor.getCount();i++){
-            isChkd.put(i,false);
-        }*/
-
         idChkd = new ArrayList<>();
 
         MyCursorAdapter cursorAdapter = new MyCursorAdapter(this, cursor, idChkd, this);
 
         lv.setAdapter(cursorAdapter);
 
-        /*lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                view.setBackgroundColor(Color.GREEN);
-                Cursor cursor1 = (Cursor) adapterView.getItemAtPosition(i);
-                int id = cursor1.getInt(cursor1.getColumnIndex(DBHelper.TIMENORM));
-                arrayList.add(id);
-                //cursor1.close();
-                Log.d("My", "onItemClick: "+id);
-
-            }
-        });*/
     }
 
     @Override
@@ -145,7 +121,27 @@ public class AddWorkActivity extends AppCompatActivity implements OnMyLVItemClic
 
     @Override
     public boolean onPrepareOptionsMenu (Menu menu){
-        menu.findItem(R.id.count).setTitle(count);
+/*        View mCount = findViewById(R.id.count);
+        if (mCount != null && mCount instanceof TextView){
+            Integer cnt = Integer.parseInt(((TextView) mCount).getText().toString());
+            if (cnt>0 && cnt <408)
+                ((TextView) mCount).setTextColor( Color.RED);
+            else if (cnt>=408 && cnt<=480)
+                ((TextView) mCount).setTextColor( Color.GREEN);
+            else  if (cnt>480)
+                ((TextView) mCount).setTextColor( Color.BLACK);
+            ((TextView) mCount).setTextSize(TypedValue.COMPLEX_UNIT_SP, 24);
+
+        }
+        menu.findItem(R.id.count).setTitle(count);*/
+
+        MenuItem mCount = menu.findItem(R.id.count);
+        SpannableString ss = new SpannableString(count);
+        Log.d(TAG, "onPrepareOptionsMenu: "+count);
+        ss.setSpan(new ForegroundColorSpan(Color.RED), 0, ss.length(), 0);
+        Log.d(TAG, "onPrepareOptionsMenu: "+ss);
+        mCount.setTitle(ss);
+
         return true;
     }
 
