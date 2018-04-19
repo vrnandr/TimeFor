@@ -33,6 +33,7 @@ public class AddWorkActivity extends AppCompatActivity implements OnMyLVItemClic
     DBHelper dbHelper;
     Menu mMenu;
     String count;
+    String need;
     final static String TAG = "My";
     List<Integer> idChkd;
 
@@ -115,8 +116,10 @@ public class AddWorkActivity extends AppCompatActivity implements OnMyLVItemClic
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.count) {
-            Toast.makeText(this, "Минут сегодня", Toast.LENGTH_SHORT).show();
+        switch (id){
+            case R.id.count: Toast.makeText(this, "Минут сегодня", Toast.LENGTH_SHORT).show();
+                             break;
+            case R.id.need: Toast.makeText(this, "Еще надо", Toast.LENGTH_SHORT).show();
         }
 
         return super.onOptionsItemSelected(item);
@@ -138,6 +141,14 @@ public class AddWorkActivity extends AppCompatActivity implements OnMyLVItemClic
 
         }
         menu.findItem(R.id.count).setTitle(count);
+
+        String ns = getResources().getString(R.string.time85);
+        Integer needTime = Integer.parseInt(ns)-Integer.parseInt(count);
+        if (needTime>0)
+            menu.findItem(R.id.need).setTitle(needTime.toString());
+        else
+            menu.findItem(R.id.need).setTitle("0");
+
         return true;
     }
 
