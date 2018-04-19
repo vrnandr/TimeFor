@@ -7,7 +7,9 @@ import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.SpannableString;
+import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
+import android.text.style.UnderlineSpan;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
@@ -69,6 +71,7 @@ public class AddWorkActivity extends AppCompatActivity implements OnMyLVItemClic
         MyCursorAdapter cursorAdapter = new MyCursorAdapter(this, cursor, idChkd, this);
 
         lv.setAdapter(cursorAdapter);
+        invalidateOptionsMenu();
 
     }
 
@@ -121,27 +124,20 @@ public class AddWorkActivity extends AppCompatActivity implements OnMyLVItemClic
 
     @Override
     public boolean onPrepareOptionsMenu (Menu menu){
-/*        View mCount = findViewById(R.id.count);
+        View mCount = findViewById(R.id.count);
+        Log.d(TAG, "onPrepareOptionsMenu: "+mCount);
         if (mCount != null && mCount instanceof TextView){
-            Integer cnt = Integer.parseInt(((TextView) mCount).getText().toString());
-            if (cnt>0 && cnt <408)
+            Integer cnt = Integer.parseInt(count);
+            if (cnt>=0 && cnt <408)
                 ((TextView) mCount).setTextColor( Color.RED);
             else if (cnt>=408 && cnt<=480)
                 ((TextView) mCount).setTextColor( Color.GREEN);
             else  if (cnt>480)
                 ((TextView) mCount).setTextColor( Color.BLACK);
-            ((TextView) mCount).setTextSize(TypedValue.COMPLEX_UNIT_SP, 24);
+
 
         }
-        menu.findItem(R.id.count).setTitle(count);*/
-
-        MenuItem mCount = menu.findItem(R.id.count);
-        SpannableString ss = new SpannableString(count);
-        Log.d(TAG, "onPrepareOptionsMenu: "+count);
-        ss.setSpan(new ForegroundColorSpan(Color.RED), 0, ss.length(), 0);
-        Log.d(TAG, "onPrepareOptionsMenu: "+ss);
-        mCount.setTitle(ss);
-
+        menu.findItem(R.id.count).setTitle(count);
         return true;
     }
 

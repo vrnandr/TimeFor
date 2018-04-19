@@ -5,6 +5,7 @@ package com.example.andrey.timefor;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.SQLException;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -18,6 +19,7 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.SimpleCursorAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -69,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
+        invalidateOptionsMenu();
 
     }
 
@@ -117,9 +120,25 @@ public class MainActivity extends AppCompatActivity {
             } while (cursor.moveToNext());
         cursor.close();
         cursorIDs.close();
+
+        Log.d(TAG, "onPrepareOptionsMenu: hz");
+
+        View mCount = findViewById(R.id.count);
+        Log.d(TAG, "onPrepareOptionsMenu: "+mCount);
+        if (mCount != null && mCount instanceof TextView){
+            if (sum>=0 && sum <408)
+                ((TextView) mCount).setTextColor( Color.RED);
+            else if (sum>=408 && sum<=480)
+                ((TextView) mCount).setTextColor( Color.GREEN);
+            else  if (sum>480)
+                ((TextView) mCount).setTextColor( Color.BLACK);
+
+
+        }
+
+        //Log.d(TAG, "onPrepareOptionsMenu: "+ ((TextView) mCount).getCurrentTextColor());
+
         menu.findItem(R.id.count).setTitle(Integer.toString(sum));
-
-
         return true;
     }
 

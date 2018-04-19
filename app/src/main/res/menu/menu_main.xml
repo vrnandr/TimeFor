@@ -4,8 +4,13 @@
     tools:context="com.example.andrey.timefor.MainActivity">
     <item
         android:id ="@+id/count"
-        android:title="1"
+        android:title=""
         android:orderInCategory="1"
+        app:showAsAction="ifRoom"/>
+    <item
+        android:id ="@+id/need"
+        android:title="@string/time85"
+        android:orderInCategory="2"
         app:showAsAction="ifRoom"/>
 
 </menu>
