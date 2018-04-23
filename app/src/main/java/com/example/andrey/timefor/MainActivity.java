@@ -2,15 +2,19 @@ package com.example.andrey.timefor;
 
 //TODO по логике WorkID это id работы а по факту это время работы
 
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.SpannableString;
 import android.util.Log;
 import android.view.View;
 import android.view.Menu;
@@ -71,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
-        invalidateOptionsMenu();
+
 
     }
 
@@ -101,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onPrepareOptionsMenu (Menu menu){
+    public boolean onPrepareOptionsMenu (final Menu menu){
         Date date = new Date();
         SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
         String dateString = format.format(date);
@@ -125,18 +129,24 @@ public class MainActivity extends AppCompatActivity {
 
         Log.d(TAG, "onPrepareOptionsMenu: hz");
 
-        View mCount = findViewById(R.id.count);
-        Log.d(TAG, "onPrepareOptionsMenu: "+mCount);
-        if (mCount != null && mCount instanceof TextView){
-            if (sum>=0 && sum <408)
-                ((TextView) mCount).setTextColor( Color.RED);
-            else if (sum>=408 && sum<=480)
-                ((TextView) mCount).setTextColor( Color.GREEN);
-            else  if (sum>480)
-                ((TextView) mCount).setTextColor( Color.BLACK);
+        final Integer sumTr= new Integer(sum);
+        new Handler().post(new Runnable() {
+            @Override
+            public void run() {
+                View mCount = findViewById(R.id.count);
+                MenuItem it = menu.findItem(R.id.count);
+                if (mCount != null && mCount instanceof TextView){
+                    if (sumTr>=0 && sumTr <408)
+                        ((TextView) mCount).setTextColor( Color.RED);
+                    else if (sumTr>=408 && sumTr<=480)
+                        ((TextView) mCount).setTextColor( Color.GREEN);
+                    else  if (sumTr>480)
+                        ((TextView) mCount).setTextColor( Color.BLACK);
+                }
+            }
+        });
 
 
-        }
 
         //Log.d(TAG, "onPrepareOptionsMenu: "+ ((TextView) mCount).getCurrentTextColor());
 
