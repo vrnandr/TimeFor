@@ -28,9 +28,14 @@ import android.widget.Toast;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -171,14 +176,15 @@ public class MainActivity extends AppCompatActivity {
         Cursor cursorIDs = dbHelper.getMyDB().rawQuery("SELECT "+DBHelper.ID+", "+DBHelper.TIMENORM+" FROM "+DBHelper.TABLE_SERVICECATALOG, null);
         //Map<Integer, Integer> idMap =
 
-        Map<String, Integer>  hashMap = new HashMap<>();
-        Set<String> dateSet = new HashSet<>();
+        Map<String, Integer>  hashMap = new LinkedHashMap<>();
+        Set<String> dateSet = new LinkedHashSet<>();
 
-        // составление набора дат
-        if (cursor.moveToFirst())
+        // составление набора дат в порядке обратно добавлению
+        if (cursor.moveToLast())
             do
                 dateSet.add(cursor.getString(cursor.getColumnIndex("Date")));
-            while (cursor.moveToNext());
+            while (cursor.moveToPrevious());
+
 
         //добавление суммы времени каждой даты
         for (String date:dateSet){
