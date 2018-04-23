@@ -1,6 +1,5 @@
 package com.example.andrey.timefor;
 
-//TODO по логике WorkID это id работы а по факту это время работы
 
 import android.content.Context;
 import android.content.Intent;
@@ -38,6 +37,9 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+//TODO select _id , Date, sum(TimeNorm) from Works inner join ServiceCatalog on WorkID=ServiceCatalog._id group by Date
+//TODO select Works._id, Works.Date, sum(ServiceCatalog.TimeNorm) from Works inner join ServiceCatalog on ServiceCatalog._id=Works.WorkID where date = "23.04.2018"
 
 public class MainActivity extends AppCompatActivity {
 
@@ -102,8 +104,9 @@ public class MainActivity extends AppCompatActivity {
         //noinspection SimplifiableIfStatement
         switch (id){
             case R.id.count: Toast.makeText(this, "Минут сегодня", Toast.LENGTH_SHORT).show();
-                break;
+            break;
             case R.id.need: Toast.makeText(this, "Еще надо", Toast.LENGTH_SHORT).show();
+            break;
         }
 
         return super.onOptionsItemSelected(item);
@@ -115,7 +118,8 @@ public class MainActivity extends AppCompatActivity {
         SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
         String dateString = format.format(date);
         //TODO курсоры теже что и в onResume
-        Cursor cursor = dbHelper.getMyDB().rawQuery("SELECT * FROM "+DBHelper.TABLE_WORKS+" WHERE Date='"+dateString+"'", null);
+
+/*        Cursor cursor = dbHelper.getMyDB().rawQuery("SELECT * FROM "+DBHelper.TABLE_WORKS+" WHERE Date='"+dateString+"'", null);
         Cursor cursorIDs = dbHelper.getMyDB().rawQuery("SELECT "+DBHelper.ID+", "+DBHelper.TIMENORM+" FROM "+DBHelper.TABLE_SERVICECATALOG, null);
         int sum = 0;
         if (cursor.moveToFirst())
@@ -132,9 +136,15 @@ public class MainActivity extends AppCompatActivity {
         cursor.close();
         cursorIDs.close();
 
-        Log.d(TAG, "onPrepareOptionsMenu: hz");
+        final Integer sumTr = sum;*/
 
-        final Integer sumTr= new Integer(sum);
+        Cursor cursor = dbHelper.getMyDB().rawQuery("select Works._id, Works.Date, sum(ServiceCatalog.TimeNorm) from Works inner join ServiceCatalog on ServiceCatalog._id=Works.WorkID where date = '"+dateString+"'", null);
+        Integer sum=0;
+        if (cursor.moveToFirst())
+            sum = cursor.getInt(2);
+        cursor.close();
+        final Integer sumTr = sum;
+
         new Handler().post(new Runnable() {
             @Override
             public void run() {
@@ -151,9 +161,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-
-        //Log.d(TAG, "onPrepareOptionsMenu: "+ ((TextView) mCount).getCurrentTextColor());
 
         menu.findItem(R.id.count).setTitle(Integer.toString(sum));
 
