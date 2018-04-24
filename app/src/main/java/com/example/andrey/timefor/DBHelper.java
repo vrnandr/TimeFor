@@ -17,7 +17,8 @@ import java.io.OutputStream;
 public class DBHelper extends SQLiteOpenHelper {
 
     private String DB_PATH = null;
-    private static final String DB_NAME = "works.db";
+    static final String DB_NAME = "works.db";
+    private static final int DB_VERSION = 2;
 
     protected SQLiteDatabase getMyDB() {
         return myDB;
@@ -41,8 +42,9 @@ public class DBHelper extends SQLiteOpenHelper {
      * @param context
      */
     public DBHelper(Context context) {
-        super(context, DB_NAME, null, 2);
+        super(context, DB_NAME, null, DB_VERSION);
         this.myContext = context;
+        //DB_PATH = context.getDatabasePath(DB_NAME).getAbsolutePath();
         this.DB_PATH = "/data/data/" + context.getPackageName() + "/databases/";
         Log.e("Path 1", DB_PATH);
     }
@@ -55,7 +57,7 @@ public class DBHelper extends SQLiteOpenHelper {
         boolean dbExist = checkDataBase();
 
         if(dbExist){
-            //ничего не делать - база уже есть
+            this.getWritableDatabase();
         }else{
             //вызывая этот метод создаем пустую базу, позже она будет перезаписана
             this.getReadableDatabase();
@@ -74,6 +76,7 @@ public class DBHelper extends SQLiteOpenHelper {
      * @return true если существует, false если не существует
      */
     private boolean checkDataBase(){
+        //setDatabaseVersion();
         SQLiteDatabase checkDB = null;
 
         try{
@@ -114,12 +117,14 @@ public class DBHelper extends SQLiteOpenHelper {
         myOutput.flush();
         myOutput.close();
         myInput.close();
+        setDatabaseVersion();
     }
 
     public void openDataBase() throws SQLException {
         //открываем БД
         String myPath = DB_PATH + DB_NAME;
         myDB = SQLiteDatabase.openDatabase(myPath, null, SQLiteDatabase.OPEN_READWRITE);
+        Log.d("My", "openDataBase: "+myDB.getVersion()+" "+myDB.getPath());
     }
 
     @Override
@@ -165,6 +170,21 @@ public class DBHelper extends SQLiteOpenHelper {
         }
     }
 
+
+    private void setDatabaseVersion() {
+        SQLiteDatabase db = null;
+        try {
+            db = SQLiteDatabase.openDatabase(DB_PATH+DB_NAME, null,SQLiteDatabase.OPEN_READWRITE);
+            db.execSQL("PRAGMA user_version = " + 1);
+        } catch (SQLiteException e ) {
+        } finally {
+            if (db != null && db.isOpen()) {
+                db.close();
+            }
+        }
+    }
+
+
     public Cursor query(String table, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy) {
         return myDB.query(TABLE_SERVICECATALOG, null, null, null, null, null, null);
     }
@@ -176,9 +196,4 @@ public class DBHelper extends SQLiteOpenHelper {
 
 
 }
-//TODO
-/*
 
-
-
- */
