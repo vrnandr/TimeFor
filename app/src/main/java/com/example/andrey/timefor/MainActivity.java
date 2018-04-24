@@ -38,8 +38,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-//TODO select _id , Date, sum(TimeNorm) from Works inner join ServiceCatalog on WorkID=ServiceCatalog._id group by Date
-//TODO select Works._id, Works.Date, sum(ServiceCatalog.TimeNorm) from Works inner join ServiceCatalog on ServiceCatalog._id=Works.WorkID where date = "23.04.2018"
 
 public class MainActivity extends AppCompatActivity {
 
@@ -81,9 +79,6 @@ public class MainActivity extends AppCompatActivity {
             throw sqle;
 
         }
-
-
-
     }
 
     @Override
@@ -117,34 +112,14 @@ public class MainActivity extends AppCompatActivity {
         Date date = new Date();
         SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
         String dateString = format.format(date);
-        //TODO курсоры теже что и в onResume
-
-/*        Cursor cursor = dbHelper.getMyDB().rawQuery("SELECT * FROM "+DBHelper.TABLE_WORKS+" WHERE Date='"+dateString+"'", null);
-        Cursor cursorIDs = dbHelper.getMyDB().rawQuery("SELECT "+DBHelper.ID+", "+DBHelper.TIMENORM+" FROM "+DBHelper.TABLE_SERVICECATALOG, null);
-        int sum = 0;
-        if (cursor.moveToFirst())
-            do{
-                Integer idWork = cursor.getInt(cursor.getColumnIndex("WorkID"));
-                if (cursorIDs.moveToFirst())
-                    do {
-                        if (cursorIDs.getInt(cursorIDs.getColumnIndex(DBHelper.ID))==idWork){
-                            sum+=cursorIDs.getInt(cursorIDs.getColumnIndex(DBHelper.TIMENORM));
-                            break;
-                        }
-                    } while (cursorIDs.moveToNext());
-            } while (cursor.moveToNext());
-        cursor.close();
-        cursorIDs.close();
-
-        final Integer sumTr = sum;*/
 
         Cursor cursor = dbHelper.getMyDB().rawQuery("select Works._id, Works.Date, sum(ServiceCatalog.TimeNorm) from Works inner join ServiceCatalog on ServiceCatalog._id=Works.WorkID where date = '"+dateString+"'", null);
         Integer sum=0;
         if (cursor.moveToFirst())
             sum = cursor.getInt(2);
         cursor.close();
+        // сменить цвет в зависимости от суммы минут
         final Integer sumTr = sum;
-
         new Handler().post(new Runnable() {
             @Override
             public void run() {
@@ -164,14 +139,13 @@ public class MainActivity extends AppCompatActivity {
 
         menu.findItem(R.id.count).setTitle(Integer.toString(sum));
 
+        //расчитать остаток от минимума минут
         String ns = getResources().getString(R.string.time85);
         Integer needTime = Integer.parseInt(ns)-sum;
         if (needTime>0)
             menu.findItem(R.id.need).setTitle(needTime.toString());
         else
             menu.findItem(R.id.need).setTitle("0");
-
-
         return true;
     }
 
@@ -179,39 +153,13 @@ public class MainActivity extends AppCompatActivity {
     public void onResume (){
         super.onResume();
 
-        Cursor cursor = dbHelper.getMyDB().rawQuery("SELECT * FROM "+DBHelper.TABLE_WORKS, null);
-        Cursor cursorIDs = dbHelper.getMyDB().rawQuery("SELECT "+DBHelper.ID+", "+DBHelper.TIMENORM+" FROM "+DBHelper.TABLE_SERVICECATALOG, null);
-        //Map<Integer, Integer> idMap =
-
         Map<String, Integer>  hashMap = new LinkedHashMap<>();
-        Set<String> dateSet = new LinkedHashSet<>();
-
-        // составление набора дат в порядке обратно добавлению
-        if (cursor.moveToLast())
-            do
-                dateSet.add(cursor.getString(cursor.getColumnIndex("Date")));
-            while (cursor.moveToPrevious());
-
-
-        //добавление суммы времени каждой даты
-        for (String date:dateSet){
-            int sum = 0;
-            if (cursor.moveToFirst())
-                do{
-                    if (cursor.getString(cursor.getColumnIndex("Date")).equals(date)){
-                        Integer idWork = cursor.getInt(cursor.getColumnIndex("WorkID"));
-                        if (cursorIDs.moveToFirst())
-                            do {
-                                if (cursorIDs.getInt(cursorIDs.getColumnIndex(DBHelper.ID))==idWork){
-                                    sum+=cursorIDs.getInt(cursorIDs.getColumnIndex(DBHelper.TIMENORM));
-                                    break;
-                                }
-                            } while (cursorIDs.moveToNext());
-                    }
-                } while (cursor.moveToNext());
-            hashMap.put(date,sum);
+        Cursor cursor = dbHelper.getMyDB().rawQuery("select Works._id, Works.Date, sum(ServiceCatalog.TimeNorm) from Works inner join ServiceCatalog on Works.WorkID=ServiceCatalog._id group by Date", null);
+        if (cursor.moveToFirst()){
+            do{
+                hashMap.put(cursor.getString(1), cursor.getInt(2));
+            }while (cursor.moveToNext());
         }
-        cursorIDs.close();
         cursor.close();
 
         ListView lv = findViewById(R.id.lv);
