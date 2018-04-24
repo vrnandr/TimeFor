@@ -155,10 +155,10 @@ public class MainActivity extends AppCompatActivity {
 
         Map<String, Integer>  hashMap = new LinkedHashMap<>();
         Cursor cursor = dbHelper.getMyDB().rawQuery("select Works._id, Works.Date, sum(ServiceCatalog.TimeNorm) from Works inner join ServiceCatalog on Works.WorkID=ServiceCatalog._id group by Date", null);
-        if (cursor.moveToFirst()){
+        if (cursor.moveToLast()){
             do{
                 hashMap.put(cursor.getString(1), cursor.getInt(2));
-            }while (cursor.moveToNext());
+            }while (cursor.moveToPrevious());
         }
         cursor.close();
 

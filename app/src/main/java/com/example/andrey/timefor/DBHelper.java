@@ -19,7 +19,7 @@ public class DBHelper extends SQLiteOpenHelper {
     private String DB_PATH = null;
     private static final String DB_NAME = "works.db";
 
-    public SQLiteDatabase getMyDB() {
+    protected SQLiteDatabase getMyDB() {
         return myDB;
     }
 
@@ -41,7 +41,7 @@ public class DBHelper extends SQLiteOpenHelper {
      * @param context
      */
     public DBHelper(Context context) {
-        super(context, DB_NAME, null, 1);
+        super(context, DB_NAME, null, 2);
         this.myContext = context;
         this.DB_PATH = "/data/data/" + context.getPackageName() + "/databases/";
         Log.e("Path 1", DB_PATH);
@@ -135,6 +135,34 @@ public class DBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        Log.d("My", "onUpgrade: ");
+        if (oldVersion==1 && newVersion==2){
+            db.beginTransaction();
+            try{
+                db.execSQL("INSERT INTO ServiceCatalog (Service, ShortDesc, LongDesc, TimeNorm) VALUES (\"ОСК-08-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА ЭТСО (КТО-1)\",\"Выполнение ППР на ЭТСО по графику\",\"планирование, организация и выполнение технического обслуживания оборудования ЭТСО в соответствии с согласованным с Заказчиком графиком\",180)");
+                db.execSQL("INSERT INTO ServiceCatalog (Service, ShortDesc, LongDesc, TimeNorm) VALUES (\"ОСК-08-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА ЭТСО (КТО-1)\",\"Консультация по работе ЭТСО\",\"консультации внутренних пользователей Заказчика по работе с оборудованием ЭТСО\",20)");
+                db.execSQL("INSERT INTO ServiceCatalog (Service, ShortDesc, LongDesc, TimeNorm) VALUES (\"ОСК-08-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА ЭТСО (КТО-1)\",\"Крупно-узловая замена компонентов ЭТСО\",\"восстановление работоспособности ЭТСО путем крупно-узловой поблочной замены неисправных узлов на месте установки\",70)");
+                db.execSQL("INSERT INTO ServiceCatalog (Service, ShortDesc, LongDesc, TimeNorm) VALUES (\"ОСК-08-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА ЭТСО (КТО-1)\",\"Отключение ЭТСО\",\"Отключение ЭТСО\",15)");
+                db.execSQL("INSERT INTO ServiceCatalog (Service, ShortDesc, LongDesc, TimeNorm) VALUES (\"ОСК-08-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА ЭТСО (КТО-1)\",\"Передача на восстановление ЭТСО подрядчику\",\"передача заявки внешнему поставщику, контроль выполнения обязательств внешнего поставщика по генеральным соглашениям и договорам Заказчика (эскалация запросов по гарантийному и не гарантийному ремонту техники)\",60)");
+                db.execSQL("INSERT INTO ServiceCatalog (Service, ShortDesc, LongDesc, TimeNorm) VALUES (\"ОСК-08-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА ЭТСО (КТО-1)\",\"Подготовка технического заключения \",\"выдача технических заключений о состоянии оборудования по запросу Заказчика\",35)");
+                db.execSQL("INSERT INTO ServiceCatalog (Service, ShortDesc, LongDesc, TimeNorm) VALUES (\"ОСК-08-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА ЭТСО (КТО-1)\",\"Подключение, настройка ЭТСО\",\"подключение и первичная настройка ЭТСО\",60)");
+                db.execSQL("INSERT INTO ServiceCatalog (Service, ShortDesc, LongDesc, TimeNorm) VALUES (\"ОСК-08-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА ЭТСО (КТО-1)\",\"Восстановление работы СПО на ЭТСО\",\"\",40)");
+                db.execSQL("INSERT INTO ServiceCatalog (Service, ShortDesc, LongDesc, TimeNorm) VALUES (\"ОСК-08-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА ЭТСО (КТО-1)\",\"Устранение сбоев на ЭТСО\",\"диагностика неисправностей и устранение сбоев в работе ЭТСО (без проведения ремонтных работ)\",60)");
+                db.execSQL("INSERT INTO ServiceCatalog (Service, ShortDesc, LongDesc, TimeNorm) VALUES (\"ОСК-08-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА ЭТСО (КТО-1)\",\"Обновление, настройка СПО на ЭТСО\",\"обновление и настройка системного ПО на ЭТСО\",120)");
+                db.execSQL("INSERT INTO ServiceCatalog (Service, ShortDesc, LongDesc, TimeNorm) VALUES (\"ОСК-08-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА ЭТСО (КТО-1)\",\"Установка, удаление, настройка СПО на ЭТСО\",\"установка/удаление и настройка системного ПО на ЭТСО\",240)");
+                db.execSQL("INSERT INTO ServiceCatalog (Service, ShortDesc, LongDesc, TimeNorm) VALUES (\"ОСК-08-02 РЕМОНТ ЭТСО (КТО-1)\",\"Крупно-узловая замена компонентов ЭТСО\",\"восстановление работоспособности ЭТСО путем крупно-узловой поблочной замены неисправных узлов на месте установки\",70)");
+                db.execSQL("INSERT INTO ServiceCatalog (Service, ShortDesc, LongDesc, TimeNorm) VALUES (\"ОСК-08-02 РЕМОНТ ЭТСО (КТО-1)\",\"Отключение ЭТСО\",\"Отключение ЭТСО\",15)");
+                db.execSQL("INSERT INTO ServiceCatalog (Service, ShortDesc, LongDesc, TimeNorm) VALUES (\"ОСК-08-02 РЕМОНТ ЭТСО (КТО-1)\",\"Передача на восстановление ЭТСО подрядчику\",\"передача заявки внешнему поставщику, контроль выполнения обязательств внешнего поставщика по генеральным соглашениям и договорам Заказчика (эскалация запросов по гарантийному и не гарантийному ремонту техники)\",60)");
+                db.execSQL("INSERT INTO ServiceCatalog (Service, ShortDesc, LongDesc, TimeNorm) VALUES (\"ОСК-08-02 РЕМОНТ ЭТСО (КТО-1)\",\"Подготовка технического заключения \",\"выдача технических заключений о состоянии оборудования по запросу Заказчика\",35)");
+                db.execSQL("INSERT INTO ServiceCatalog (Service, ShortDesc, LongDesc, TimeNorm) VALUES (\"ОСК-08-02 РЕМОНТ ЭТСО (КТО-1)\",\"Подключение, настройка ЭТСО\",\"подключение и первичная настройка ЭТСО\",60)");
+                db.execSQL("INSERT INTO ServiceCatalog (Service, ShortDesc, LongDesc, TimeNorm) VALUES (\"ОСК-08-02 РЕМОНТ ЭТСО (КТО-1)\",\"Диагностика ЭТСО\",\"проведение первичной диагностики ЭТСО\",40)");
+                db.execSQL("INSERT INTO ServiceCatalog (Service, ShortDesc, LongDesc, TimeNorm) VALUES (\"ОСК-08-02 РЕМОНТ ЭТСО (КТО-1)\",\"Установка, удаление, настройка СПО на ЭТСО\",\"установка/удаление и настройка системного ПО на ЭТСО\",240)");
+                db.execSQL("INSERT INTO ServiceCatalog (Service, ShortDesc, LongDesc, TimeNorm) VALUES (\"ОСК-08-02 РЕМОНТ ЭТСО (КТО-1)\",\"Ремонт компонентов ЭТСО\",\"диагностика и ремонт неисправных блоков на месте установки ЭТСО, рабочем месте РП или в ЦР\",240)");
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+        }
     }
 
     public Cursor query(String table, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy) {
@@ -148,3 +176,9 @@ public class DBHelper extends SQLiteOpenHelper {
 
 
 }
+//TODO
+/*
+
+
+
+ */
