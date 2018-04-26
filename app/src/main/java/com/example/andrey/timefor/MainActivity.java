@@ -19,10 +19,13 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ExpandableListAdapter;
+import android.widget.ExpandableListView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.SimpleCursorAdapter;
+import android.widget.SimpleExpandableListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -154,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
     public void onResume (){
         super.onResume();
 
-        Map<String, Integer>  hashMap = new LinkedHashMap<>();
+        /*Map<String, Integer>  hashMap = new LinkedHashMap<>();
         Cursor cursor = dbHelper.getMyDB().rawQuery("select Works._id, Works.Date, sum(ServiceCatalog.TimeNorm) from Works inner join ServiceCatalog on Works.WorkID=ServiceCatalog._id group by Date", null);
         if (cursor.moveToLast()){
             do{
@@ -165,7 +168,69 @@ public class MainActivity extends AppCompatActivity {
 
         ListView lv = findViewById(R.id.lv);
         LvAdapter lvAdapter= new LvAdapter(hashMap);
-        lv.setAdapter(lvAdapter);
+        lv.setAdapter(lvAdapter);*/
+
+
+        Map<String, String>  hashMap = new LinkedHashMap<>();
+        Cursor cursor = dbHelper.getMyDB().rawQuery("select Works._id, Works.Date, sum(ServiceCatalog.TimeNorm) from Works inner join ServiceCatalog on Works.WorkID=ServiceCatalog._id group by Date", null);
+        if (cursor.moveToLast()){
+            do{
+                hashMap.put(cursor.getString(1), cursor.getString(2));
+            }while (cursor.moveToPrevious());
+        }
+        cursor.close();
+
+
+        //Даты
+        List<Map<String, String>> dateList = new ArrayList<>();
+        for (String dateSting:hashMap.keySet()){
+            Map<String,String> map = new HashMap<>();
+            map.put("date", dateSting);
+            map.put("sum", hashMap.get(dateSting));
+            dateList.add(map);
+        }
+
+
+        List<List<Map<String, String>>> worksList = new ArrayList<>();
+
+
+        for (Map <String,String> date: dateList){
+            List<Map<String, String>> works  = new ArrayList<>();
+
+            String dateString = date.get("date");
+            cursor = dbHelper.getMyDB().rawQuery("select ServiceCatalog._id, ServiceCatalog.Service, ServiceCatalog.TimeNorm from ServiceCatalog inner join Works on ServiceCatalog._id=Works.WorkID where date = '"+dateString+"'", null);
+            if (cursor.moveToFirst())
+                do {
+                    Map<String,String> map = new HashMap<>();
+                    map.put("work", cursor.getString(1));
+                    map.put("time", cursor.getString(2));
+                    works.add(map);
+                }while (cursor.moveToNext());
+
+            worksList.add(works);
+        }
+        cursor.close();
+
+        ExpandableListView elv = findViewById(R.id.expandableListView);
+
+        SimpleExpandableListAdapter listAdapter = new SimpleExpandableListAdapter(
+                this,
+
+                dateList,
+                android.R.layout.simple_expandable_list_item_2,
+                new String[] {"date","sum"},
+                new int[] {android.R.id.text1,android.R.id.text2},
+
+                worksList,
+                android.R.layout.simple_expandable_list_item_2,
+                new String[]{"work", "time"},
+                new int[]{android.R.id.text1, android.R.id.text2}
+
+        );
+
+        elv.setAdapter(listAdapter);
+
+
         invalidateOptionsMenu();
 
     }
