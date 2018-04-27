@@ -2,14 +2,13 @@ package com.example.andrey.timefor;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
-import android.widget.CursorAdapter;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.CursorAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;

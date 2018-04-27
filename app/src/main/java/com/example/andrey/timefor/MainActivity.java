@@ -1,30 +1,19 @@
 package com.example.andrey.timefor;
 
 
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.SQLException;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.SpannableString;
-import android.util.Log;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ExpandableListAdapter;
+import android.view.View;
 import android.widget.ExpandableListView;
-import android.widget.ListAdapter;
-import android.widget.ListView;
-import android.widget.SimpleAdapter;
-import android.widget.SimpleCursorAdapter;
 import android.widget.SimpleExpandableListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,20 +21,15 @@ import android.widget.Toast;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 
 public class MainActivity extends AppCompatActivity {
 
-    private Cursor c;
     private final String TAG = "My";
     private DBHelper dbHelper;
     Menu mMenu;
@@ -102,6 +86,8 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         switch (id){
+            case R.id.mean: Toast.makeText(this, "Среднее", Toast.LENGTH_SHORT).show();
+                break;
             case R.id.count: Toast.makeText(this, "Минут сегодня", Toast.LENGTH_SHORT).show();
             break;
             case R.id.need: Toast.makeText(this, "Еще надо", Toast.LENGTH_SHORT).show();
@@ -113,15 +99,32 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onPrepareOptionsMenu (final Menu menu){
+
+        Cursor cursor = dbHelper.getMyDB().rawQuery("select (sum(ServiceCatalog.TimeNorm)) from ServiceCatalog inner join Works on ServiceCatalog._id = Works.WorkID", null);
+        int sumAllDays = 0;
+        if (cursor.moveToFirst())
+            sumAllDays = cursor.getInt(0);
+        cursor = dbHelper.getMyDB().rawQuery("SELECT count(DISTINCT Date) FROM Works", null);
+        int countDays = 1;
+        if (cursor.moveToFirst())
+            countDays = cursor.getInt(0);
+
+        int mean = sumAllDays/countDays;
+
+        menu.findItem(R.id.mean).setTitle(Integer.toString(mean));
+
+
+
         Date date = new Date();
         SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
         String dateString = format.format(date);
 
-        Cursor cursor = dbHelper.getMyDB().rawQuery("select Works._id, Works.Date, sum(ServiceCatalog.TimeNorm) from Works inner join ServiceCatalog on ServiceCatalog._id=Works.WorkID where date = '"+dateString+"'", null);
+        cursor = dbHelper.getMyDB().rawQuery("select Works._id, Works.Date, sum(ServiceCatalog.TimeNorm) from Works inner join ServiceCatalog on ServiceCatalog._id=Works.WorkID where date = '"+dateString+"'", null);
         Integer sum=0;
         if (cursor.moveToFirst())
             sum = cursor.getInt(2);
         cursor.close();
+
         // сменить цвет в зависимости от суммы минут
         final Integer sumTr = sum;
         new Handler().post(new Runnable() {
@@ -156,21 +159,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onResume (){
         super.onResume();
-
-        /*Map<String, Integer>  hashMap = new LinkedHashMap<>();
-        Cursor cursor = dbHelper.getMyDB().rawQuery("select Works._id, Works.Date, sum(ServiceCatalog.TimeNorm) from Works inner join ServiceCatalog on Works.WorkID=ServiceCatalog._id group by Date", null);
-        if (cursor.moveToLast()){
-            do{
-                hashMap.put(cursor.getString(1), cursor.getInt(2));
-            }while (cursor.moveToPrevious());
-        }
-        cursor.close();
-
-        ListView lv = findViewById(R.id.lv);
-        LvAdapter lvAdapter= new LvAdapter(hashMap);
-        lv.setAdapter(lvAdapter);*/
-
-
         Map<String, String>  hashMap = new LinkedHashMap<>();
         Cursor cursor = dbHelper.getMyDB().rawQuery("select Works._id, Works.Date, sum(ServiceCatalog.TimeNorm) from Works inner join ServiceCatalog on Works.WorkID=ServiceCatalog._id group by Date", null);
         if (cursor.moveToLast()){
@@ -217,22 +205,20 @@ public class MainActivity extends AppCompatActivity {
                 this,
 
                 dateList,
-                android.R.layout.simple_expandable_list_item_2,
+                R.layout.exlitems,
                 new String[] {"date","sum"},
-                new int[] {android.R.id.text1,android.R.id.text2},
+                new int[] {R.id.date, R.id.timeSum},
 
                 worksList,
-                android.R.layout.simple_expandable_list_item_2,
+                R.layout.exlsubitems,
                 new String[]{"work", "time"},
-                new int[]{android.R.id.text1, android.R.id.text2}
+                new int[] {R.id.service, R.id.time}
 
         );
 
         elv.setAdapter(listAdapter);
 
-
         invalidateOptionsMenu();
-
     }
 
     @Override

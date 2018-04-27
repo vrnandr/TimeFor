@@ -4,14 +4,9 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.graphics.Color;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.SpannableString;
-import android.text.Spanned;
-import android.text.style.ForegroundColorSpan;
-import android.text.style.UnderlineSpan;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -33,7 +28,6 @@ public class AddWorkActivity extends AppCompatActivity implements OnMyLVItemClic
     DBHelper dbHelper;
     Menu mMenu;
     String count;
-    String need;
     final static String TAG = "My";
     List<Integer> idChkd;
 
