@@ -59,13 +59,14 @@ public class MainActivity extends AppCompatActivity {
         try {
             dbHelper.createDataBase();
         } catch (IOException ioe) {
+            Toast.makeText(this, ioe.getMessage(),Toast.LENGTH_SHORT).show();
             throw new Error("Unable to create database");
         }
         try {
             dbHelper.openDataBase();
         } catch (SQLException sqle) {
+            Toast.makeText(this, sqle.getMessage(),Toast.LENGTH_SHORT).show();
             throw sqle;
-
         }
     }
 
@@ -109,9 +110,12 @@ public class MainActivity extends AppCompatActivity {
         if (cursor.moveToFirst())
             countDays = cursor.getInt(0);
 
-        int mean = sumAllDays/countDays;
+        if (countDays==0) {
+            menu.findItem(R.id.mean).setTitle("");
+        } else {
+            menu.findItem(R.id.mean).setTitle(Integer.toString(sumAllDays/countDays));
+        }
 
-        menu.findItem(R.id.mean).setTitle(Integer.toString(mean));
 
 
 
