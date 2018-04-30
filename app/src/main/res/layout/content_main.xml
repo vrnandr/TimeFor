@@ -11,6 +11,7 @@
 
     <ExpandableListView
         android:id="@+id/expandableListView"
+        android:descendantFocusability="blocksDescendants"
         android:layout_width="344dp"
         android:layout_height="543dp"
         android:layout_marginBottom="8dp"

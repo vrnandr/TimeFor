@@ -175,7 +175,7 @@ public class DBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = null;
         try {
             db = SQLiteDatabase.openDatabase(DB_PATH+DB_NAME, null,SQLiteDatabase.OPEN_READWRITE);
-            db.execSQL("PRAGMA user_version = " + 1);
+            db.execSQL("PRAGMA user_version = 1");
         } catch (SQLiteException e ) {
         } finally {
             if (db != null && db.isOpen()) {

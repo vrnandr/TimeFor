@@ -11,9 +11,13 @@ import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ExpandableListView;
 import android.widget.SimpleCursorTreeAdapter;
 import android.widget.SimpleExpandableListAdapter;
@@ -70,6 +74,20 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, sqle.getMessage(),Toast.LENGTH_SHORT).show();
             throw sqle;
         }
+
+
+        final ExpandableListView elv = findViewById(R.id.expandableListView);
+        /*elv.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+            @Override
+            public boolean onChildClick(ExpandableListView expandableListView, View view, int i, int i1, long l) {
+                dbHelper.getMyDB().execSQL("delete from Works Where _id ="+l);
+                //notifyDataSetChanged();
+                return true;
+            }
+
+
+        });*/
+
     }
 
     @Override
@@ -167,7 +185,7 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         ExpandableListView elv = findViewById(R.id.expandableListView);
 
-        Cursor cursor = dbHelper.getMyDB().rawQuery("select Works._id, Works.Date, sum(ServiceCatalog.TimeNorm) from Works inner join ServiceCatalog on Works.WorkID=ServiceCatalog._id group by Date", null);
+        Cursor cursor = dbHelper.getMyDB().rawQuery("select Works._id, Works.Date as date, sum(ServiceCatalog.TimeNorm) as sum from Works inner join ServiceCatalog on Works.WorkID=ServiceCatalog._id group by Date order by Date desc", null);
 
         SimpleCursorTreeAdapter simpleCursorTreeAdapter = new MySimpleCursorTreeAdapter(
                 this,
@@ -182,65 +200,6 @@ public class MainActivity extends AppCompatActivity {
                 new int[] {R.id.service, R.id.time});
 
         elv.setAdapter(simpleCursorTreeAdapter);
-
-
-        /*        Map<String, String>  hashMap = new LinkedHashMap<>();
-        if (cursor.moveToLast()){
-            do{
-                hashMap.put(cursor.getString(1), cursor.getString(2));
-            }while (cursor.moveToPrevious());
-        }
-        cursor.close();
-
-
-        //Даты
-        List<Map<String, String>> dateList = new ArrayList<>();
-        for (String dateSting:hashMap.keySet()){
-            Map<String,String> map = new HashMap<>();
-            map.put("date", dateSting);
-            map.put("sum", hashMap.get(dateSting));
-            dateList.add(map);
-        }
-
-
-        List<List<Map<String, String>>> worksList = new ArrayList<>();
-
-
-        for (Map <String,String> date: dateList){
-            List<Map<String, String>> works  = new ArrayList<>();
-
-            String dateString = date.get("date");
-            cursor = dbHelper.getMyDB().rawQuery("select ServiceCatalog._id, ServiceCatalog.Service, ServiceCatalog.TimeNorm from ServiceCatalog inner join Works on ServiceCatalog._id=Works.WorkID where date = '"+dateString+"'", null);
-            if (cursor.moveToFirst())
-                do {
-                    Map<String,String> map = new HashMap<>();
-                    map.put("work", cursor.getString(1));
-                    map.put("time", cursor.getString(2));
-                    works.add(map);
-                }while (cursor.moveToNext());
-
-            worksList.add(works);
-        }
-        cursor.close();
-
-
-
-        SimpleExpandableListAdapter listAdapter = new SimpleExpandableListAdapter(
-                this,
-
-                dateList,
-                R.layout.exlitems,
-                new String[] {"date","sum"},
-                new int[] {R.id.date, R.id.timeSum},
-
-                worksList,
-                R.layout.exlsubitems,
-                new String[]{"work", "time"},
-                new int[] {R.id.service, R.id.time}
-
-        );
-
-        elv.setAdapter(listAdapter);*/
 
         invalidateOptionsMenu();
     }
@@ -259,10 +218,25 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
+        protected void bindChildView(View view, Context context, Cursor cursor, boolean isLastChild) {
+            super.bindChildView(view, context, cursor, isLastChild);
+            view.setTag(cursor.getInt(0));
+            view.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    Log.d(TAG, "onLongClick: "+view.getTag());
+                    return true;
+                }
+            });
+        }
+
+
+        @Override
         protected Cursor getChildrenCursor(Cursor cursor) {
             String date = cursor.getString(1);
-            return  dbHelper.getMyDB().rawQuery("select ServiceCatalog._id, ServiceCatalog.Service, ServiceCatalog.TimeNorm from ServiceCatalog inner join Works on ServiceCatalog._id=Works.WorkID where date = '"+date+"'", null);
+            return  dbHelper.getMyDB().rawQuery("select Works._id, ServiceCatalog.Service as work, ServiceCatalog.TimeNorm as time from ServiceCatalog inner join Works on ServiceCatalog._id=Works.WorkID where date = '"+date+"'", null);
         }
+
     }
 
 }
