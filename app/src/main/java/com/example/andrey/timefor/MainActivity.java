@@ -1,8 +1,12 @@
 package com.example.andrey.timefor;
 
 
+import android.app.AlertDialog;
+import android.app.LoaderManager;
 import android.content.Context;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.graphics.Color;
@@ -34,11 +38,14 @@ import java.util.List;
 import java.util.Map;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity{
 
     private final String TAG = "My";
     private DBHelper dbHelper;
     Menu mMenu;
+
+    SimpleCursorTreeAdapter simpleCursorTreeAdapter;
+    ExpandableListView elv;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,17 +83,39 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
-        final ExpandableListView elv = findViewById(R.id.expandableListView);
-        /*elv.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+
+        elv = findViewById(R.id.expandableListView);
+
+        Cursor cursor = dbHelper.getMyDB().rawQuery("select Works._id, Works.Date as date, sum(ServiceCatalog.TimeNorm) as sum from Works inner join ServiceCatalog on Works.WorkID=ServiceCatalog._id group by Date order by Date desc", null);
+
+        simpleCursorTreeAdapter = new MySimpleCursorTreeAdapter(
+                this,
+
+                cursor,
+                R.layout.exlitems,
+                new String[] {"date","sum"},
+                new int[] {R.id.date, R.id.timeSum},
+
+                R.layout.exlsubitems,
+                new String[]{"work", "time"},
+                new int[] {R.id.service, R.id.time});
+
+        elv.setAdapter(simpleCursorTreeAdapter);
+
+        elv.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView expandableListView, View view, int i, int i1, long l) {
+
+
                 dbHelper.getMyDB().execSQL("delete from Works Where _id ="+l);
+                Cursor cursor = dbHelper.getMyDB().rawQuery("select Works._id, Works.Date as date, sum(ServiceCatalog.TimeNorm) as sum from Works inner join ServiceCatalog on Works.WorkID=ServiceCatalog._id group by Date order by Date desc", null);
+                simpleCursorTreeAdapter.changeCursor(cursor);
+                simpleCursorTreeAdapter.notifyDataSetChanged();
+                invalidateOptionsMenu();
                 //notifyDataSetChanged();
                 return true;
             }
-
-
-        });*/
+        });
 
     }
 
@@ -183,24 +212,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onResume (){
         super.onResume();
-        ExpandableListView elv = findViewById(R.id.expandableListView);
 
         Cursor cursor = dbHelper.getMyDB().rawQuery("select Works._id, Works.Date as date, sum(ServiceCatalog.TimeNorm) as sum from Works inner join ServiceCatalog on Works.WorkID=ServiceCatalog._id group by Date order by Date desc", null);
-
-        SimpleCursorTreeAdapter simpleCursorTreeAdapter = new MySimpleCursorTreeAdapter(
-                this,
-
-                cursor,
-                R.layout.exlitems,
-                new String[] {"date","sum"},
-                new int[] {R.id.date, R.id.timeSum},
-
-                R.layout.exlsubitems,
-                new String[]{"work", "time"},
-                new int[] {R.id.service, R.id.time});
-
-        elv.setAdapter(simpleCursorTreeAdapter);
-
+        simpleCursorTreeAdapter.changeCursor(cursor);
+        simpleCursorTreeAdapter.notifyDataSetChanged();
         invalidateOptionsMenu();
     }
 
@@ -215,19 +230,6 @@ public class MainActivity extends AppCompatActivity {
 
         public MySimpleCursorTreeAdapter(Context context, Cursor cursor, int groupLayout, String[] groupFrom, int[] groupTo, int childLayout, String[] childFrom, int[] childTo) {
             super(context, cursor, groupLayout, groupFrom, groupTo, childLayout, childFrom, childTo);
-        }
-
-        @Override
-        protected void bindChildView(View view, Context context, Cursor cursor, boolean isLastChild) {
-            super.bindChildView(view, context, cursor, isLastChild);
-            view.setTag(cursor.getInt(0));
-            view.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View view) {
-                    Log.d(TAG, "onLongClick: "+view.getTag());
-                    return true;
-                }
-            });
         }
 
 
