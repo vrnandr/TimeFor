@@ -4,10 +4,12 @@ import android.app.ListActivity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.SQLException;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.Toast;
 
 import java.io.IOException;
 
@@ -18,19 +20,16 @@ public class SelectServiceActivity extends ListActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        DBHelper dbHelper = new DBHelper(this);
+        SQLiteDatabase db;
         try {
-            dbHelper.createDataBase();
-        } catch (IOException ioe) {
+            DBHelper dbHelper = new DBHelper(this);
+            db = dbHelper.getReadableDatabase();
+        } catch (SQLException e) {
+            Toast.makeText(this, e.getLocalizedMessage() ,Toast.LENGTH_LONG).show();
             throw new Error("Unable to create database");
         }
-        try {
-            dbHelper.openDataBase();
-        } catch (SQLException sqle) {
-            throw sqle;
-        }
 
-        c = dbHelper.queryServices();
+        c = db.rawQuery("SELECT * FROM "+DBHelper.TABLE_SERVICECATALOG+" GROUP BY "+ DBHelper.SERVICE, null);
         SimpleCursorAdapter simpleCursorAdapter = new SimpleCursorAdapter(this, android.R.layout.simple_list_item_1, c, new String[]{DBHelper.SERVICE}, new int[]{android.R.id.text1},0 );
 
         setListAdapter(simpleCursorAdapter);

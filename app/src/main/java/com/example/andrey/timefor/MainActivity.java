@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.database.SQLException;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
@@ -42,6 +43,7 @@ public class MainActivity extends AppCompatActivity{
 
     private final String TAG = "My";
     private DBHelper dbHelper;
+    private SQLiteDatabase db;
     Menu mMenu;
 
     SimpleCursorTreeAdapter simpleCursorTreeAdapter;
@@ -67,26 +69,18 @@ public class MainActivity extends AppCompatActivity{
             }
         });
 
-
-        dbHelper = new DBHelper(this);
         try {
-            dbHelper.createDataBase();
-        } catch (IOException ioe) {
-            Toast.makeText(this, ioe.getMessage(),Toast.LENGTH_SHORT).show();
+            dbHelper = new DBHelper(this);
+            db = dbHelper.getWritableDatabase();
+        } catch (SQLException e) {
+            Toast.makeText(this, e.getLocalizedMessage() ,Toast.LENGTH_LONG).show();
             throw new Error("Unable to create database");
         }
-        try {
-            dbHelper.openDataBase();
-        } catch (SQLException sqle) {
-            Toast.makeText(this, sqle.getMessage(),Toast.LENGTH_SHORT).show();
-            throw sqle;
-        }
-
 
 
         elv = findViewById(R.id.expandableListView);
 
-        Cursor cursor = dbHelper.getMyDB().rawQuery("select Works._id, Works.Date as date, sum(ServiceCatalog.TimeNorm) as sum from Works inner join ServiceCatalog on Works.WorkID=ServiceCatalog._id group by Date order by Date desc", null);
+        Cursor cursor = db.rawQuery("select Works._id, Works.Date as date, sum(ServiceCatalog.TimeNorm) as sum from Works inner join ServiceCatalog on Works.WorkID=ServiceCatalog._id group by Date order by Date desc", null);
 
         simpleCursorTreeAdapter = new MySimpleCursorTreeAdapter(
                 this,
@@ -107,8 +101,8 @@ public class MainActivity extends AppCompatActivity{
             public boolean onChildClick(ExpandableListView expandableListView, View view, int i, int i1, long l) {
 
 
-                dbHelper.getMyDB().execSQL("delete from Works Where _id ="+l);
-                Cursor cursor = dbHelper.getMyDB().rawQuery("select Works._id, Works.Date as date, sum(ServiceCatalog.TimeNorm) as sum from Works inner join ServiceCatalog on Works.WorkID=ServiceCatalog._id group by Date order by Date desc", null);
+                db.execSQL("delete from Works Where _id ="+l);
+                Cursor cursor = db.rawQuery("select Works._id, Works.Date as date, sum(ServiceCatalog.TimeNorm) as sum from Works inner join ServiceCatalog on Works.WorkID=ServiceCatalog._id group by Date order by Date desc", null);
                 simpleCursorTreeAdapter.changeCursor(cursor);
                 simpleCursorTreeAdapter.notifyDataSetChanged();
                 invalidateOptionsMenu();
@@ -150,11 +144,11 @@ public class MainActivity extends AppCompatActivity{
     @Override
     public boolean onPrepareOptionsMenu (final Menu menu){
 
-        Cursor cursor = dbHelper.getMyDB().rawQuery("select (sum(ServiceCatalog.TimeNorm)) from ServiceCatalog inner join Works on ServiceCatalog._id = Works.WorkID", null);
+        Cursor cursor = db.rawQuery("select (sum(ServiceCatalog.TimeNorm)) from ServiceCatalog inner join Works on ServiceCatalog._id = Works.WorkID", null);
         int sumAllDays = 0;
         if (cursor.moveToFirst())
             sumAllDays = cursor.getInt(0);
-        cursor = dbHelper.getMyDB().rawQuery("SELECT count(DISTINCT Date) FROM Works", null);
+        cursor = db.rawQuery("SELECT count(DISTINCT Date) FROM Works", null);
         int countDays = 1;
         if (cursor.moveToFirst())
             countDays = cursor.getInt(0);
@@ -172,7 +166,7 @@ public class MainActivity extends AppCompatActivity{
         SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
         String dateString = format.format(date);
 
-        cursor = dbHelper.getMyDB().rawQuery("select Works._id, Works.Date, sum(ServiceCatalog.TimeNorm) from Works inner join ServiceCatalog on ServiceCatalog._id=Works.WorkID where date = '"+dateString+"'", null);
+        cursor = db.rawQuery("select Works._id, Works.Date, sum(ServiceCatalog.TimeNorm) from Works inner join ServiceCatalog on ServiceCatalog._id=Works.WorkID where date = '"+dateString+"'", null);
         Integer sum=0;
         if (cursor.moveToFirst())
             sum = cursor.getInt(2);
@@ -213,7 +207,7 @@ public class MainActivity extends AppCompatActivity{
     public void onResume (){
         super.onResume();
 
-        Cursor cursor = dbHelper.getMyDB().rawQuery("select Works._id, Works.Date as date, sum(ServiceCatalog.TimeNorm) as sum from Works inner join ServiceCatalog on Works.WorkID=ServiceCatalog._id group by Date order by Date desc", null);
+        Cursor cursor = db.rawQuery("select Works._id, Works.Date as date, sum(ServiceCatalog.TimeNorm) as sum from Works inner join ServiceCatalog on Works.WorkID=ServiceCatalog._id group by Date order by Date desc", null);
         simpleCursorTreeAdapter.changeCursor(cursor);
         simpleCursorTreeAdapter.notifyDataSetChanged();
         invalidateOptionsMenu();
@@ -236,7 +230,7 @@ public class MainActivity extends AppCompatActivity{
         @Override
         protected Cursor getChildrenCursor(Cursor cursor) {
             String date = cursor.getString(1);
-            return  dbHelper.getMyDB().rawQuery("select Works._id, ServiceCatalog.Service as work, ServiceCatalog.TimeNorm as time from ServiceCatalog inner join Works on ServiceCatalog._id=Works.WorkID where date = '"+date+"'", null);
+            return  db.rawQuery("select Works._id, ServiceCatalog.Service as work, ServiceCatalog.TimeNorm as time from ServiceCatalog inner join Works on ServiceCatalog._id=Works.WorkID where date = '"+date+"'", null);
         }
 
     }

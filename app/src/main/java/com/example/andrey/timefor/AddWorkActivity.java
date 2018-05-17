@@ -3,6 +3,7 @@ package com.example.andrey.timefor;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.SQLException;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -30,6 +31,7 @@ public class AddWorkActivity extends AppCompatActivity implements OnMyLVItemClic
     String count;
     final static String TAG = "My";
     List<Integer> idChkd;
+    private SQLiteDatabase db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,20 +43,16 @@ public class AddWorkActivity extends AppCompatActivity implements OnMyLVItemClic
 
         arrayList = new ArrayList<>();
 
-        dbHelper = new DBHelper(this);
         try {
-            dbHelper.createDataBase();
-        } catch (IOException ioe) {
+            dbHelper = new DBHelper(this);
+            db = dbHelper.getWritableDatabase();
+        } catch (SQLException e) {
+            Toast.makeText(this, e.getLocalizedMessage() ,Toast.LENGTH_LONG).show();
             throw new Error("Unable to create database");
-        }
-        try {
-            dbHelper.openDataBase();
-        } catch (SQLException sqle) {
-            throw sqle;
         }
 
         Log.d("My", "onCreate: "+service);
-        cursor = dbHelper.getMyDB().rawQuery("SELECT * FROM "+DBHelper.TABLE_SERVICECATALOG+" WHERE "+DBHelper.SERVICE+" = '"+service+"'", null);
+        cursor = db.rawQuery("SELECT * FROM "+DBHelper.TABLE_SERVICECATALOG+" WHERE "+DBHelper.SERVICE+" = '"+service+"'", null);
 
         Log.d("My", "onCreate: "+cursor.getCount());
 
@@ -85,7 +83,7 @@ public class AddWorkActivity extends AppCompatActivity implements OnMyLVItemClic
         String dateString = format.format(date);
         for (Integer id:idChkd){
             String sql="INSERT INTO Works (Date, WorkID) VALUES ('"+dateString+"', '"+id+"')";
-            dbHelper.getMyDB().execSQL(sql);
+            db.execSQL(sql);
         }
 
         Intent intent = new Intent(this, MainActivity.class);

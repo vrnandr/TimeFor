@@ -1,5 +1,6 @@
 package com.example.andrey.timefor;
 
+import android.app.Application;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -7,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -16,184 +18,254 @@ import java.io.OutputStream;
 
 public class DBHelper extends SQLiteOpenHelper {
 
-    private String DB_PATH = null;
-    static final String DB_NAME = "works.db";
-    private static final int DB_VERSION = 2;
-
-    protected SQLiteDatabase getMyDB() {
-        return myDB;
-    }
-
-    private SQLiteDatabase myDB;
-    private final Context myContext;
-
+    private static final String DB_NAME = "works.db";
+    private static final int DB_VERSION = 1;
     final static String SERVICE = "Service";
     final static String SHORTDESC = "ShortDesc";
-    final static String LONGDESC = "LongDesc";
     final static String TIMENORM = "TimeNorm";
     final static String ID ="_id";
     final static String TABLE_SERVICECATALOG = "ServiceCatalog";
     final static String TABLE_WORKS = "Works";
 
-
-    /**
-     * Конструктор
-     * Принимает и сохраняет ссылку на переданный контекст для доступа к ресурсам приложения
-     * @param context
-     */
     public DBHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
-        this.myContext = context;
-        //DB_PATH = context.getDatabasePath(DB_NAME).getAbsolutePath();
-        this.DB_PATH = "/data/data/" + context.getPackageName() + "/databases/";
-        Log.e("Path 1", DB_PATH);
-    }
-
-
-    /**
-     * Создает пустую базу данных и перезаписывает ее нашей собственной базой
-     * */
-    public void createDataBase() throws IOException {
-        boolean dbExist = checkDataBase();
-
-        if(dbExist){
-            this.getWritableDatabase();
-        }else{
-            //вызывая этот метод создаем пустую базу, позже она будет перезаписана
-            this.getReadableDatabase();
-
-            try {
-                copyDataBase();
-            } catch (IOException e) {
-                throw new Error("Error copying database");
-            }
-        }
-    }
-
-
-    /**
-     * Проверяет, существует ли уже эта база, чтобы не копировать каждый раз при запуске приложения
-     * @return true если существует, false если не существует
-     */
-    private boolean checkDataBase(){
-        //setDatabaseVersion();
-        SQLiteDatabase checkDB = null;
-
-        try{
-            String myPath = DB_PATH + DB_NAME;
-            checkDB = SQLiteDatabase.openDatabase(myPath, null, SQLiteDatabase.OPEN_READONLY);
-        }catch(SQLiteException e){
-            //база еще не существует
-        }
-        if(checkDB != null){
-            checkDB.close();
-        }
-        return checkDB != null ? true : false;
-    }
-
-
-    /**
-     * Копирует базу из папки assets заместо созданной локальной БД
-     * Выполняется путем копирования потока байтов.
-     * */
-    private void copyDataBase() throws IOException{
-        //Открываем локальную БД как входящий поток
-        InputStream myInput = myContext.getAssets().open(DB_NAME);
-
-        //Путь ко вновь созданной БД
-        String outFileName = DB_PATH + DB_NAME;
-
-        //Открываем пустую базу данных как исходящий поток
-        OutputStream myOutput = new FileOutputStream(outFileName);
-
-        //перемещаем байты из входящего файла в исходящий
-        byte[] buffer = new byte[1024];
-        int length;
-        while ((length = myInput.read(buffer))>0){
-            myOutput.write(buffer, 0, length);
-        }
-
-        //закрываем потоки
-        myOutput.flush();
-        myOutput.close();
-        myInput.close();
-        setDatabaseVersion();
-    }
-
-    public void openDataBase() throws SQLException {
-        //открываем БД
-        String myPath = DB_PATH + DB_NAME;
-        myDB = SQLiteDatabase.openDatabase(myPath, null, SQLiteDatabase.OPEN_READWRITE);
-        Log.d("My", "openDataBase: "+myDB.getVersion()+" "+myDB.getPath());
-    }
-
-    @Override
-    public synchronized void close() {
-        if(myDB != null)
-            myDB.close();
-        super.close();
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+        db.beginTransaction();
+        try {
+            db.execSQL("CREATE TABLE ServiceCatalog (_id INTEGER PRIMARY KEY AUTOINCREMENT, Service TEXT, ShortDesc TEXT, TimeNorm  INTEGER)");
+            db.execSQL("CREATE TABLE Works (_id INTEGER PRIMARY KEY AUTOINCREMENT, Date TEXT, WorkID INTEGER, Distance REAL)");
+
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-02-01 ПЕРЕГОВОРНЫЕ','Демонстрация аудио/видео контента',90)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-02-01 ПЕРЕГОВОРНЫЕ','Консультация по проведению мероприятий',20)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-02-01 ПЕРЕГОВОРНЫЕ','Подготовка, настройка оборудования для конференций',40)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-02-01 ПЕРЕГОВОРНЫЕ','Техническое обслуживание оборудования',70)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-02-01 ПЕРЕГОВОРНЫЕ','Техническое сопровождение мероприятия',90)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-04-01 БКО_БТО-1','Выполнение ППР на БКО',90)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-04-01 БКО_БТО-1','Консультация по работе БКО',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-04-01 БКО_БТО-1','Модернизация БКО',75)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-04-01 БКО_БТО-1','Отключение БКО',60)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-04-01 БКО_БТО-1','Подготовка технического заключения по работе БКО',50)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-04-01 БКО_БТО-1','Подключение БКО',60)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-04-01 БКО_БТО-1','Ремонт БКО',60)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-04-01 БКО_БТО-1','Устранение сбоев в работе БКО',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-06-01 РМП_ВП','Обновление клиентского ПО',40)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-06-01 РМП_ВП','Перенос данных клиентского ПО на другое РМ',80)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-06-01 РМП_ВП','Удаление клиентского ПО',15)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-06-01 РМП_ВП','Установка, настройка клиентского ПО',40)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-06-01 РМП_ВП','Устранение сбоев клиентского ПО',40)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-07-01 ЭТСО_БТО-1','Диагностика ЭТСО',40)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-07-01 ЭТСО_БТО-1','Консультация по работе ЭТСО',20)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-07-01 ЭТСО_БТО-1','Крупно-узловая замена компонентов ЭТСО',60)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-07-01 ЭТСО_БТО-1','Отключение ЭТСО',15)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-07-01 ЭТСО_БТО-1','Передача на восстановление ЭТСО подрядчику',60)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-07-01 ЭТСО_БТО-1','Подключение, настройка ЭТСО',60)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-07-01 ЭТСО_БТО-1','Устранение сбоев на ЭТСО',60)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-08-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА ЭТСО (КТО-1)','Восстановление работы СПО на ЭТСО',90)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-08-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА ЭТСО (КТО-1)','Выполнение ППР на ЭТСО по графику',60)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-08-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА ЭТСО (КТО-1)','Диагностика ЭТСО',40)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-08-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА ЭТСО (КТО-1)','Консультация по работе ЭТСО',20)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-08-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА ЭТСО (КТО-1)','Крупно-узловая замена компонентов ЭТСО',60)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-08-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА ЭТСО (КТО-1)','Обновление, настройка СПО на ЭТСО',60)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-08-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА ЭТСО (КТО-1)','Отключение ЭТСО',15)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-08-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА ЭТСО (КТО-1)','Передача на восстановление ЭТСО подрядчику',60)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-08-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА ЭТСО (КТО-1)','Подготовка технического заключения',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-08-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА ЭТСО (КТО-1)','Подключение, настройка ЭТСО',60)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-08-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА ЭТСО (КТО-1)','Установка, удаление, настройка СПО на ЭТСО',120)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-08-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА ЭТСО (КТО-1)','Устранение сбоев на ЭТСО',60)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-08-02 РЕМОНТ ЭТСО (КТО-1)','Диагностика ЭТСО',40)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-08-02 РЕМОНТ ЭТСО (КТО-1)','Крупно-узловая замена компонентов ЭТСО',60)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-08-02 РЕМОНТ ЭТСО (КТО-1)','Отключение ЭТСО',15)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-08-02 РЕМОНТ ЭТСО (КТО-1)','Передача на восстановление ЭТСО подрядчику',60)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-08-02 РЕМОНТ ЭТСО (КТО-1)','Подготовка технического заключения',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-08-02 РЕМОНТ ЭТСО (КТО-1)','Подключение, настройка ЭТСО',60)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-08-02 РЕМОНТ ЭТСО (КТО-1)','Ремонт компонентов ЭТСО',120)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-09-01 ЛВС-СПД','Восстановление работоспособности оборудования крупно-узловой заменой',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-09-01 ЛВС-СПД','Выполнение ППР на СПД по графику',80)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-09-01 ЛВС-СПД','Коммутация СКС',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-09-01 ЛВС-СПД','Монтаж  демонтаж оборудования СПД',20)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-09-01 ЛВС-СПД','Первичная настройка оборудования СПД',50)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-09-01 ЛВС-СПД','Подготовка технического заключения',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-09-01 ЛВС-СПД','Проверка каналов связи: основной. резервный, GSM, WIFI',60)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-09-01 ЛВС-СПД','Устранение сбоев оборудования СПД',50)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-10-01 МРМ_БТО-1','Диагностика, восстановление работы СПО/ППО на МРМ',60)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-10-01 МРМ_БТО-1','Замена оборудования МРМ',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-10-01 МРМ_БТО-1','Консультация по работе МРМ',20)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-10-01 МРМ_БТО-1','Передача на восстановление МРМ подрядчику',50)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-10-01 МРМ_БТО-1','Подключение МРМ к WiFi, GSM',20)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-10-01 МРМ_БТО-1','Подключение, настройка внешних устройств к МРМ',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-10-01 МРМ_БТО-1','Установка/удаление, обновление, настройка СПО/ППО. специального ПО на МРМ',50)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-10-01 МРМ_БТО-1','Устранение сбоев МРМ',60)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-12-01 ССО','Восстановление работоспособности оборудования поблочной заменой неисправных узлов',60)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-12-01 ССО','Выполнение ППР на серверах по графику',60)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-12-01 ССО','Диагностика сбоев на серверах',50)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-12-01 ССО','Замена серверного оборудования из состава оперативного фонда',90)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-12-01 ССО','Модернизация серверов',60)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-12-01 ССО','Подготовка технического заключения',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-12-01 ССО','Установка, удаление, обновление, настройка СПО/ППО',50)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-12-01 ССО','Устранение сбоев на серверах',60)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-13-01 СКС','Восстановление линии порт - патч-панель',50)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-13-01 СКС','Диагностика компонентов СКС',40)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-13-01 СКС','Документирование работ на СКС',20)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-13-01 СКС','Инвентаризация ЗИП. кабельной системы ЛВС',60)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-13-01 СКС','Перенос розеток без модернизации СКС',60)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-13-01 СКС','Ремонт/замена элементов СКС',20)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-14-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА (БТО-1)','Восстановление работоспособности оборудования поблочной заменой неисправных узлов',60)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-14-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА (БТО-1)','Выполнение ППР на РМ по графику',60)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-14-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА (БТО-1)','Диагностика неполадок оборудования и ПО',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-14-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА (БТО-1)','Замена компонентов РМ',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-14-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА (БТО-1)','Консультация по работе РМ',15)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-14-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА (БТО-1)','Модернизация РМ',40)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-14-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА (БТО-1)','Отключение РМ',15)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-14-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА (БТО-1)','Подготовка технического заключения',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-14-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА (БТО-1)','Подключение и настройка внешних устройств на РМ',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-14-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА (БТО-1)','Подключение, настройка РМ',45)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-14-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА (БТО-1)','Установка, обновление, настройка. удаление СПО/ППО на РМ',55)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-14-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА (БТО-1)','Устранение сбоев на РМ',50)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-14-02 ОРГАНИЗАЦИЯ НОВОГО РАБОЧЕГО МЕСТА (БТО-1)','Установка и настройка СПО/ППО на РМ',90)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-14-02 ОРГАНИЗАЦИЯ НОВОГО РАБОЧЕГО МЕСТА (БТО-1)','Установка, настройка оборудования нового РМ. подключение и настройка ПУ и СПД. Установка и настройка СПО/ППО на РМ. Перенос данных',90)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-15-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА (КТО-1)','Восстановление работоспособности оборудования поблочной заменой неисправных узлов',60)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-15-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА (КТО-1)','Выполнение ППР на РМ по графику',60)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-15-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА (КТО-1)','Диагностика неполадок оборудования и ПО',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-15-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА (КТО-1)','Замена компонентов РМ',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-15-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА (КТО-1)','Замена неисправных элементов',40)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-15-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА (КТО-1)','Консультация по работе РМ',15)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-15-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА (КТО-1)','Модернизация РМ',40)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-15-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА (КТО-1)','Отключение РМ',15)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-15-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА (КТО-1)','Подготовка технического заключения',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-15-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА (КТО-1)','Подключение и настройка внешних устройств на РМ',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-15-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА (КТО-1)','Подключение, настройка РМ',45)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-15-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА (КТО-1)','Установка, обновление, настройка. удаление СПО/ППО на РМ',55)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-15-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА (КТО-1)','Устранение сбоев на РМ',50)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-15-02 ОРГАНИЗАЦИЯ НОВОГО РАБОЧЕГО МЕСТА (КТО-1)','Установка и настройка СПО/ППО на РМ',90)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-15-02 ОРГАНИЗАЦИЯ НОВОГО РАБОЧЕГО МЕСТА (КТО-1)','Установка, настройка оборудования нового РМ, подключение и настройка ПУ и СПД. Установка и настройка СПО/ППО на РМ. Перенос данных',90)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-15-03 РЕМОНТ РАБОЧЕГО МЕСТА (КТО-1)','Диагностика оборудования РМ',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-15-03 РЕМОНТ РАБОЧЕГО МЕСТА (КТО-1)','Замена неисправных элементов оборудования РМ',120)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-15-03 РЕМОНТ РАБОЧЕГО МЕСТА (КТО-1)','Крупно-узловая поблочная замена компонентов РМ',45)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-15-03 РЕМОНТ РАБОЧЕГО МЕСТА (КТО-1)','Подготовка технического заключения',35)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-15-03 РЕМОНТ РАБОЧЕГО МЕСТА (КТО-1)','Прием и диагностика оборудования РМ',45)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-16-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА VIP (БТО-1)','Восстановление работоспособности оборудования поблочной заменой неисправных узлов',60)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-16-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА VIP (БТО-1)','Выполнение ППР на РМ по графику',60)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-16-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА VIP (БТО-1)','Диагностика неполадок оборудования и ПО',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-16-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА VIP (БТО-1)','Замена компонентов РМ',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-16-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА VIP (БТО-1)','Консультация по работе РМ',15)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-16-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА VIP (БТО-1)','Модернизация РМ',40)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-16-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА VIP (БТО-1)','Отключение РМ',15)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-16-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА VIP (БТО-1)','Подготовка технического заключения',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-16-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА VIP (БТО-1)','Подключение и настройка внешних устройств на РМ',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-16-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА VIP (БТО-1)','Подключение, настройка РМ',45)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-16-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА VIP (БТО-1)','Установка, обновление, настройка, удаление СПО/ППО на РМ',55)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-16-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА VIP (БТО-1)','Устранение сбоев на РМ',50)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-16-02 ОРГАНИЗАЦИЯ НОВОГО РАБОЧЕГО МЕСТА VIP (БТО-1)','Установка и настройка СПО/ППО на РМ',90)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-16-02 ОРГАНИЗАЦИЯ НОВОГО РАБОЧЕГО МЕСТА VIP (БТО-1)','Установка, настройка оборудования нового РМ. подключение и настройка ПУ и СПД. Установка и настройка СПО/ППО на РМ. Перенос данных',90)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-17-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА VIP (КТО-1)','Восстановление работоспособности оборудования поблочной заменой неисправных узлов',60)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-17-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА VIP (КТО-1)','Выполнение ППР на РМ по графику',60)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-17-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА VIP (КТО-1)','Диагностика неполадок оборудования и ПО',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-17-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА VIP (КТО-1)','Замена компонентов РМ',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-17-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА VIP (КТО-1)','Замена неисправных элементов',40)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-17-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА VIP (КТО-1)','Консультация по работе РМ',15)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-17-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА VIP (КТО-1)','Модернизация РМ',40)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-17-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА VIP (КТО-1)','Отключение РМ',15)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-17-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА VIP (КТО-1)','Подготовка технического заключения',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-17-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА VIP (КТО-1)','Подключение и настройка внешних устройств на РМ',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-17-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА VIP (КТО-1)','Подключение, настройка РМ',45)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-17-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА VIP (КТО-1)','Установка, обновление, настройка, удаление СПО/ППО на РМ',55)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-17-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА VIP (КТО-1)','Устранение сбоев на РМ',50)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-17-02 ОРГАНИЗАЦИЯ НОВОГО РАБОЧЕГО МЕСТА VIP (КТО-1)','Установка и настройка СПО/ППО на РМ',90)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-17-02 ОРГАНИЗАЦИЯ НОВОГО РАБОЧЕГО МЕСТА VIP (КТО-1)','Установка, настройка оборудования нового РМ. подключение и настройка ПУ и СПД, Установка и настройка СПО/ППО на РМ. Перенос данных',90)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-17-03 РЕМОНТ РАБОЧЕГО МЕСТА VIP (КТО-1)','Диагностика оборудования РМ',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-17-03 РЕМОНТ РАБОЧЕГО МЕСТА VIP (КТО-1)','Замена неисправных элементов оборудования РМ',120)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-17-03 РЕМОНТ РАБОЧЕГО МЕСТА VIP (КТО-1)','Крупно-узловая поблочная замена компонентов РМ',45)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-17-03 РЕМОНТ РАБОЧЕГО МЕСТА VIP (КТО-1)','Подготовка технического заключения',35)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-17-03 РЕМОНТ РАБОЧЕГО МЕСТА VIP (КТО-1)','Прием и диагностика оборудования РМ',45)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-18-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА CIP (БТО-1)','Восстановление работоспособности оборудования поблочной заменой неисправных узлов',60)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-18-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА CIP (БТО-1)','Выполнение ППР на РМ по графику',60)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-18-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА CIP (БТО-1)','Диагностика неполадок оборудования и ПО',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-18-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА CIP (БТО-1)','Замена компонентов РМ',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-18-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА CIP (БТО-1)','Консультация по работе РМ',15)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-18-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА CIP (БТО-1)','Модернизация РМ',40)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-18-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА CIP (БТО-1)','Отключение РМ',15)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-18-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА CIP (БТО-1)','Подготовка технического заключения',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-18-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА CIP (БТО-1)','Подключение и настройка внешних устройств на РМ',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-18-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА CIP (БТО-1)','Подключение, настройка РМ',45)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-18-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА CIP (БТО-1)','Установка, обновление, настройка. удаление СПО ППО на РМ',55)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-18-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА CIP (БТО-1)','Устранение сбоев на РМ',50)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-18-02 ОРГАНИЗАЦИЯ НОВОГО РАБОЧЕГО МЕСТА CIP (БТО-1)','Установка и настройка СПО/ППО на РМ',90)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-18-02 ОРГАНИЗАЦИЯ НОВОГО РАБОЧЕГО МЕСТА CIP (БТО-1)','Установка, настройка оборудования нового РМ. подключение и настройка ПУ и СПД. Установка и настройка СПО/ППО на РМ. Перенос данных',90)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-19-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА CIP (КТО-1)','Восстановление работоспособности оборудования поблочной заменой неисправных узлов',60)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-19-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА CIP (КТО-1)','Выполнение ППР на РМ по графику',60)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-19-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА CIP (КТО-1)','Диагностика неполадок оборудования и ПО',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-19-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА CIP (КТО-1)','Замена компонентов РМ',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-19-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА CIP (КТО-1)','Замена неисправных элементов',40)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-19-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА CIP (КТО-1)','Консультация по работе РМ',15)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-19-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА CIP (КТО-1)','Модернизация РМ',40)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-19-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА CIP (КТО-1)','Отключение РМ',15)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-19-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА CIP (КТО-1)','Подготовка технического заключения',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-19-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА CIP (КТО-1)','Подключение и настройка внешних устройств на РМ',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-19-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА CIP (КТО-1)','Подключение, настройка РМ',45)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-19-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА CIP (КТО-1)','Установка, обновление, настройка. удаление СПО/ППО на РМ',55)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-19-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА РАБОЧЕГО МЕСТА CIP (КТО-1)','Устранение сбоев на РМ',50)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-19-02 ОРГАНИЗАЦИЯ НОВОГО РАБОЧЕГО МЕСТА CIP (КТО-1)','Установка и настройка СПО/ППО на РМ',90)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-19-02 ОРГАНИЗАЦИЯ НОВОГО РАБОЧЕГО МЕСТА CIP (КТО-1)','Установка, настройка оборудования нового РМ. подключение и настройка ПУ и СПД. Установка и настройка СПО/ППО на РМ. Перенос данных',90)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-19-03 РЕМОНТ РАБОЧЕГО МЕСТА CIP (КТО-1)','Диагностика оборудования РМ',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-19-03 РЕМОНТ РАБОЧЕГО МЕСТА CIP (КТО-1)','Замена неисправных элементов оборудования РМ',120)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-19-03 РЕМОНТ РАБОЧЕГО МЕСТА CIP (КТО-1)','Крупно-узловая поблочная замена компонентов РМ',45)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-19-03 РЕМОНТ РАБОЧЕГО МЕСТА CIP (КТО-1)','Подготовка технического заключения',35)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-19-03 РЕМОНТ РАБОЧЕГО МЕСТА CIP (КТО-1)','Прием и диагностика оборудования РМ',45)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-20-01 ПЕРИФЕРИЯ БТО-1','Выполнение крупно-узлового ремонта',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-20-01 ПЕРИФЕРИЯ БТО-1','Выполнение ППР на ПУ по графику',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-20-01 ПЕРИФЕРИЯ БТО-1','Диагностика ПУ и КМТ',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-20-01 ПЕРИФЕРИЯ БТО-1','Замена ПУ из оперативного фонда Заказчика',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-20-01 ПЕРИФЕРИЯ БТО-1','Замена расходных материалов (предоставляет Заказчик)',10)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-20-01 ПЕРИФЕРИЯ БТО-1','Консультация по работе с ПУ',15)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-20-01 ПЕРИФЕРИЯ БТО-1','Модернизация ПУ',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-20-01 ПЕРИФЕРИЯ БТО-1','Настройка ПУ',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-20-01 ПЕРИФЕРИЯ БТО-1','Отключение ПУ',10)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-20-01 ПЕРИФЕРИЯ БТО-1','Подготовка технического заключения',35)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-20-01 ПЕРИФЕРИЯ БТО-1','Подключение, настройка ПУ',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-20-01 ПЕРИФЕРИЯ БТО-1','Устранение сбоев ПУ',40)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-21-01 ПЕРИФЕРИЯ БТО-2','Выполнение крупно-узлового ремонта',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-21-01 ПЕРИФЕРИЯ БТО-2','Выполнение ППР на ПУ по графику',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-21-01 ПЕРИФЕРИЯ БТО-2','Диагностика ПУ и КМТ',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-21-01 ПЕРИФЕРИЯ БТО-2','Замена ПУ из оперативного фонда Заказчика',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-21-01 ПЕРИФЕРИЯ БТО-2','Замена расходных материалов (включены в стоимость услуги)',10)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-21-01 ПЕРИФЕРИЯ БТО-2','Консультация по работе ПУ',15)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-21-01 ПЕРИФЕРИЯ БТО-2','Модернизация ПУ',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-21-01 ПЕРИФЕРИЯ БТО-2','Настройка ПУ',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-21-01 ПЕРИФЕРИЯ БТО-2','Отключение ПУ',10)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-21-01 ПЕРИФЕРИЯ БТО-2','Подготовка технического заключения',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-21-01 ПЕРИФЕРИЯ БТО-2','Подключение, настройка ПУ',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-21-01 ПЕРИФЕРИЯ БТО-2','Устранение сбоев ПУ',40)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-23-01 СОПРОВОЖДЕНИЕ ПЕРИФЕРИЙНЫХ УСТРОЙСТВ (КТО-2)','Выполнение крупно-узлового ремонта',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-23-01 СОПРОВОЖДЕНИЕ ПЕРИФЕРИЙНЫХ УСТРОЙСТВ (КТО-2)','Выполнение ППР на ПУ по графику',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-23-01 СОПРОВОЖДЕНИЕ ПЕРИФЕРИЙНЫХ УСТРОЙСТВ (КТО-2)','Диагностика ПУ и КМТ',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-23-01 СОПРОВОЖДЕНИЕ ПЕРИФЕРИЙНЫХ УСТРОЙСТВ (КТО-2)','Замена расходных материалов (включены в стоимость услуги)',10)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-23-01 СОПРОВОЖДЕНИЕ ПЕРИФЕРИЙНЫХ УСТРОЙСТВ (КТО-2)','Консультация по работе с ПУ',15)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-23-01 СОПРОВОЖДЕНИЕ ПЕРИФЕРИЙНЫХ УСТРОЙСТВ (КТО-2)','Модернизация ПУ',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-23-01 СОПРОВОЖДЕНИЕ ПЕРИФЕРИЙНЫХ УСТРОЙСТВ (КТО-2)','Настройка ПУ',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-23-01 СОПРОВОЖДЕНИЕ ПЕРИФЕРИЙНЫХ УСТРОЙСТВ (КТО-2)','Отключение ПУ',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-23-01 СОПРОВОЖДЕНИЕ ПЕРИФЕРИЙНЫХ УСТРОЙСТВ (КТО-2)','Подготовка технического заключения',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-23-01 СОПРОВОЖДЕНИЕ ПЕРИФЕРИЙНЫХ УСТРОЙСТВ (КТО-2)','Подключение, настройка ПУ',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-23-02 РЕМОНТ ПЕРИФЕРИЙНЫХ УСТРОЙСТВ (КТО-2)','Диагностика ПУ и КМТ',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-23-02 РЕМОНТ ПЕРИФЕРИЙНЫХ УСТРОЙСТВ (КТО-2)','Замена неисправных элементов ПУ',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-23-02 РЕМОНТ ПЕРИФЕРИЙНЫХ УСТРОЙСТВ (КТО-2)','Крупно-узловая поблочная замена компонентов ПУ',60)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-23-02 РЕМОНТ ПЕРИФЕРИЙНЫХ УСТРОЙСТВ (КТО-2)','Подготовка технического заключения',30)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-23-02 РЕМОНТ ПЕРИФЕРИЙНЫХ УСТРОЙСТВ (КТО-2)','Прием и диагностика ПУ в СЦ ОСК',45)");
+            db.setTransactionSuccessful();
+        } catch (SQLException e){
+            Log.d("My", "onCreate: "+e.getLocalizedMessage());
+        }   finally {
+            db.endTransaction();
+        }
+
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        Log.d("My", "onUpgrade: ");
-        if (oldVersion==1 && newVersion==2){
-            db.beginTransaction();
-            try{
-                db.execSQL("INSERT INTO ServiceCatalog (Service, ShortDesc, LongDesc, TimeNorm) VALUES (\"ОСК-08-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА ЭТСО (КТО-1)\",\"Выполнение ППР на ЭТСО по графику\",\"планирование, организация и выполнение технического обслуживания оборудования ЭТСО в соответствии с согласованным с Заказчиком графиком\",180)");
-                db.execSQL("INSERT INTO ServiceCatalog (Service, ShortDesc, LongDesc, TimeNorm) VALUES (\"ОСК-08-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА ЭТСО (КТО-1)\",\"Консультация по работе ЭТСО\",\"консультации внутренних пользователей Заказчика по работе с оборудованием ЭТСО\",20)");
-                db.execSQL("INSERT INTO ServiceCatalog (Service, ShortDesc, LongDesc, TimeNorm) VALUES (\"ОСК-08-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА ЭТСО (КТО-1)\",\"Крупно-узловая замена компонентов ЭТСО\",\"восстановление работоспособности ЭТСО путем крупно-узловой поблочной замены неисправных узлов на месте установки\",70)");
-                db.execSQL("INSERT INTO ServiceCatalog (Service, ShortDesc, LongDesc, TimeNorm) VALUES (\"ОСК-08-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА ЭТСО (КТО-1)\",\"Отключение ЭТСО\",\"Отключение ЭТСО\",15)");
-                db.execSQL("INSERT INTO ServiceCatalog (Service, ShortDesc, LongDesc, TimeNorm) VALUES (\"ОСК-08-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА ЭТСО (КТО-1)\",\"Передача на восстановление ЭТСО подрядчику\",\"передача заявки внешнему поставщику, контроль выполнения обязательств внешнего поставщика по генеральным соглашениям и договорам Заказчика (эскалация запросов по гарантийному и не гарантийному ремонту техники)\",60)");
-                db.execSQL("INSERT INTO ServiceCatalog (Service, ShortDesc, LongDesc, TimeNorm) VALUES (\"ОСК-08-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА ЭТСО (КТО-1)\",\"Подготовка технического заключения \",\"выдача технических заключений о состоянии оборудования по запросу Заказчика\",35)");
-                db.execSQL("INSERT INTO ServiceCatalog (Service, ShortDesc, LongDesc, TimeNorm) VALUES (\"ОСК-08-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА ЭТСО (КТО-1)\",\"Подключение, настройка ЭТСО\",\"подключение и первичная настройка ЭТСО\",60)");
-                db.execSQL("INSERT INTO ServiceCatalog (Service, ShortDesc, LongDesc, TimeNorm) VALUES (\"ОСК-08-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА ЭТСО (КТО-1)\",\"Восстановление работы СПО на ЭТСО\",\"\",40)");
-                db.execSQL("INSERT INTO ServiceCatalog (Service, ShortDesc, LongDesc, TimeNorm) VALUES (\"ОСК-08-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА ЭТСО (КТО-1)\",\"Устранение сбоев на ЭТСО\",\"диагностика неисправностей и устранение сбоев в работе ЭТСО (без проведения ремонтных работ)\",60)");
-                db.execSQL("INSERT INTO ServiceCatalog (Service, ShortDesc, LongDesc, TimeNorm) VALUES (\"ОСК-08-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА ЭТСО (КТО-1)\",\"Обновление, настройка СПО на ЭТСО\",\"обновление и настройка системного ПО на ЭТСО\",120)");
-                db.execSQL("INSERT INTO ServiceCatalog (Service, ShortDesc, LongDesc, TimeNorm) VALUES (\"ОСК-08-01 ТЕХНИЧЕСКАЯ ПОДДЕРЖКА ЭТСО (КТО-1)\",\"Установка, удаление, настройка СПО на ЭТСО\",\"установка/удаление и настройка системного ПО на ЭТСО\",240)");
-                db.execSQL("INSERT INTO ServiceCatalog (Service, ShortDesc, LongDesc, TimeNorm) VALUES (\"ОСК-08-02 РЕМОНТ ЭТСО (КТО-1)\",\"Крупно-узловая замена компонентов ЭТСО\",\"восстановление работоспособности ЭТСО путем крупно-узловой поблочной замены неисправных узлов на месте установки\",70)");
-                db.execSQL("INSERT INTO ServiceCatalog (Service, ShortDesc, LongDesc, TimeNorm) VALUES (\"ОСК-08-02 РЕМОНТ ЭТСО (КТО-1)\",\"Отключение ЭТСО\",\"Отключение ЭТСО\",15)");
-                db.execSQL("INSERT INTO ServiceCatalog (Service, ShortDesc, LongDesc, TimeNorm) VALUES (\"ОСК-08-02 РЕМОНТ ЭТСО (КТО-1)\",\"Передача на восстановление ЭТСО подрядчику\",\"передача заявки внешнему поставщику, контроль выполнения обязательств внешнего поставщика по генеральным соглашениям и договорам Заказчика (эскалация запросов по гарантийному и не гарантийному ремонту техники)\",60)");
-                db.execSQL("INSERT INTO ServiceCatalog (Service, ShortDesc, LongDesc, TimeNorm) VALUES (\"ОСК-08-02 РЕМОНТ ЭТСО (КТО-1)\",\"Подготовка технического заключения \",\"выдача технических заключений о состоянии оборудования по запросу Заказчика\",35)");
-                db.execSQL("INSERT INTO ServiceCatalog (Service, ShortDesc, LongDesc, TimeNorm) VALUES (\"ОСК-08-02 РЕМОНТ ЭТСО (КТО-1)\",\"Подключение, настройка ЭТСО\",\"подключение и первичная настройка ЭТСО\",60)");
-                db.execSQL("INSERT INTO ServiceCatalog (Service, ShortDesc, LongDesc, TimeNorm) VALUES (\"ОСК-08-02 РЕМОНТ ЭТСО (КТО-1)\",\"Диагностика ЭТСО\",\"проведение первичной диагностики ЭТСО\",40)");
-                db.execSQL("INSERT INTO ServiceCatalog (Service, ShortDesc, LongDesc, TimeNorm) VALUES (\"ОСК-08-02 РЕМОНТ ЭТСО (КТО-1)\",\"Установка, удаление, настройка СПО на ЭТСО\",\"установка/удаление и настройка системного ПО на ЭТСО\",240)");
-                db.execSQL("INSERT INTO ServiceCatalog (Service, ShortDesc, LongDesc, TimeNorm) VALUES (\"ОСК-08-02 РЕМОНТ ЭТСО (КТО-1)\",\"Ремонт компонентов ЭТСО\",\"диагностика и ремонт неисправных блоков на месте установки ЭТСО, рабочем месте РП или в ЦР\",240)");
-                db.setTransactionSuccessful();
-            } finally {
-                db.endTransaction();
-            }
-        }
+
     }
-
-
-    private void setDatabaseVersion() {
-        SQLiteDatabase db = null;
-        try {
-            db = SQLiteDatabase.openDatabase(DB_PATH+DB_NAME, null,SQLiteDatabase.OPEN_READWRITE);
-            db.execSQL("PRAGMA user_version = 1");
-        } catch (SQLiteException e ) {
-        } finally {
-            if (db != null && db.isOpen()) {
-                db.close();
-            }
-        }
-    }
-
-
-    public Cursor query(String table, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy) {
-        return myDB.query(TABLE_SERVICECATALOG, null, null, null, null, null, null);
-    }
-
-    public Cursor queryServices() {
-        return myDB.rawQuery("SELECT * FROM "+TABLE_SERVICECATALOG+" GROUP BY "+SERVICE, null);
-    }
-
-
 
 }
 
