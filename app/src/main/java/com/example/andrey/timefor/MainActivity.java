@@ -4,9 +4,9 @@ package com.example.andrey.timefor;
 import android.app.AlertDialog;
 import android.app.LoaderManager;
 import android.content.Context;
-import android.content.CursorLoader;
+
 import android.content.Intent;
-import android.content.Loader;
+
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
@@ -17,6 +17,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -33,10 +34,6 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
 
 public class MainActivity extends AppCompatActivity{
@@ -79,6 +76,7 @@ public class MainActivity extends AppCompatActivity{
 
 
         elv = findViewById(R.id.expandableListView);
+        registerForContextMenu(elv);
 
         Cursor cursor = db.rawQuery("select Works._id, Works.Date as date, sum(ServiceCatalog.TimeNorm) as sum from Works inner join ServiceCatalog on Works.WorkID=ServiceCatalog._id group by Date order by Date desc", null);
 
@@ -96,22 +94,48 @@ public class MainActivity extends AppCompatActivity{
 
         elv.setAdapter(simpleCursorTreeAdapter);
 
-        elv.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+/*        elv.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView expandableListView, View view, int i, int i1, long l) {
 
 
                 db.execSQL("delete from Works Where _id ="+l);
                 Cursor cursor = db.rawQuery("select Works._id, Works.Date as date, sum(ServiceCatalog.TimeNorm) as sum from Works inner join ServiceCatalog on Works.WorkID=ServiceCatalog._id group by Date order by Date desc", null);
+                Log.d(TAG, "onChildClick: "+l);
+                *//*dbHelper.getMyDB().execSQL("delete from Works Where _id ="+l);
+                Cursor cursor = dbHelper.getMyDB().rawQuery("select Works._id, Works.Date as date, sum(ServiceCatalog.TimeNorm) as sum from Works inner join ServiceCatalog on Works.WorkID=ServiceCatalog._id group by Date order by Date desc", null);
                 simpleCursorTreeAdapter.changeCursor(cursor);
                 simpleCursorTreeAdapter.notifyDataSetChanged();
                 invalidateOptionsMenu();
-                //notifyDataSetChanged();
+                //notifyDataSetChanged();*//*
                 return true;
             }
-        });
+        });*/
 
     }
+
+
+    public void onCreateContextMenu(ContextMenu menu, View v,
+                                    ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        menu.add(0,1 , 0, "Удалить");
+    }
+
+    public boolean onContextItemSelected(MenuItem item) {
+        if (item.getItemId() == 1) {
+            ExpandableListView.ExpandableListContextMenuInfo acmi = (ExpandableListView.ExpandableListContextMenuInfo) item
+                    .getMenuInfo();
+            db.execSQL("delete from Works Where _id ="+acmi.id);
+            Cursor cursor = db.rawQuery("select Works._id, Works.Date as date, sum(ServiceCatalog.TimeNorm) as sum from Works inner join ServiceCatalog on Works.WorkID=ServiceCatalog._id group by Date order by Date desc", null);
+            simpleCursorTreeAdapter.changeCursor(cursor);
+            simpleCursorTreeAdapter.notifyDataSetChanged();
+            invalidateOptionsMenu();
+            return true;
+        }
+        return super.onContextItemSelected(item);
+    }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -218,6 +242,7 @@ public class MainActivity extends AppCompatActivity{
         dbHelper.close();
         super.onDestroy();
     }
+
 
     class MySimpleCursorTreeAdapter extends SimpleCursorTreeAdapter {
 
