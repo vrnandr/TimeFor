@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="Уведомления"
+        android:key="notification_category">
+        <CheckBoxPreference
+            android:key="enable_notification"
+            android:title="Включить уведомления"
+            android:defaultValue="true"/>
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="Меню"
+        android:key="menu_category">
+        <CheckBoxPreference
+            android:key="enable_coloring"
+            android:title="Раскраска времени"
+            android:defaultValue="true"/>
+        <EditTextPreference
+            android:id="@+id/edpTimeNorm"
+            android:key="time_norm"
+            android:title="Норма времени"
+            android:defaultValue="480"
+            android:inputType="numberSigned"/>
+        <EditTextPreference
+            android:id="@+id/edpTimePercentage"
+            android:key="need_time_percentage"
+            android:title="Необходимый % от нормы времени"
+            android:defaultValue="85"
+            android:inputType="number"/>
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="Время в пути"
+        android:key="time_on_road_category">
+        <CheckBoxPreference
+            android:id="@+id/enableTimeOnRoad"
+            android:key="enable_time_on_road"
+            android:title="Учитывать время в пути"
+            android:defaultValue="false"/>
+        <EditTextPreference
+            android:enabled="false"
+            android:id="@+id/timeOnRoad"
+            android:key="time_on_road"
+            android:title="Среднее время в пути, добавлятся при добавлении работ"
+            android:defaultValue="10"
+            android:inputType="number"/>
+    </PreferenceCategory>
+</PreferenceScreen>
