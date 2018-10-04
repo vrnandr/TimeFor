@@ -14,7 +14,11 @@ import android.util.Log;
 
 public class DBHelper extends SQLiteOpenHelper {
 
-    private static final int DB_VERSION = 10;
+    private static final int DB_VERSION = 11;
+    //10 версия коневертирование 30.10.2010 в 2010.10.30
+    //11 версия конвертирование 2010.10.30 в 2010-10-30 формат даты sqlite
+
+
     private static final String DB_NAME = "works.db";
     public static final String ID ="_id";
     public static final String SERVICE = "Service";
@@ -262,6 +266,8 @@ public class DBHelper extends SQLiteOpenHelper {
 
         if (oldVersion < 10 && newVersion == 10)
             db.execSQL("UPDATE Works SET Date = substr(Date, 7, 4) || '.' || substr(Date, 4,2) || '.' || substr(Date, 1,2)");
+        if (oldVersion == 10 && newVersion == 11)
+            db.execSQL("UPDATE Works SET Date = substr(Date, 1, 4) || '-' || substr(Date, 6,2) || '-' || substr(Date, 9,2)");
 
     }
 }

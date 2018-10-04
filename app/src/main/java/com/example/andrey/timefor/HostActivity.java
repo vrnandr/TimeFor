@@ -52,6 +52,8 @@ public class HostActivity extends AppCompatActivity implements
     boolean enableNotification = true;
     private boolean enableSettingButton = true;
 
+    public static final String PATTERN = "yyyy-MM-dd";
+
     @Override
     protected void onStop() {
         super.onStop();
@@ -189,7 +191,7 @@ public class HostActivity extends AppCompatActivity implements
     @Override
     public void onAddWorkButtonClick(Set<Integer> idWorksToAdd) {
         Date date = new Date();
-        SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd", Locale.getDefault());// HH:mm:ss.SSS");
+        SimpleDateFormat format = new SimpleDateFormat(PATTERN, Locale.getDefault());// HH:mm:ss.SSS");
         String dateString = format.format(date);
         database.beginTransaction();
         try{

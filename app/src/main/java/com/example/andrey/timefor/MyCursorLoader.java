@@ -39,7 +39,7 @@ public class MyCursorLoader extends CursorLoader {
     @Override
     public Cursor loadInBackground() {
         Date date = new Date();
-        SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd", Locale.getDefault());
+        SimpleDateFormat format = new SimpleDateFormat(HostActivity.PATTERN, Locale.getDefault());
         String dateString = format.format(date);
         switch (id){
             case DAYS: return database.rawQuery("select Works._id, Works.Date as date, sum(ServiceCatalog.TimeNorm) as sum from Works inner join ServiceCatalog on Works.WorkID=ServiceCatalog._id group by Date order by Date desc", null);
