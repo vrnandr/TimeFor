@@ -3,6 +3,7 @@ package com.example.andrey.timefor;
 //todo добавить примерное время в пути и добавление его к времени работ
 //todo считать среднее за месяц
 //todo поменять пакет и залить на гитхаб
+//todo изменить вывод даты в листью к виду гггг.мм.дд
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -42,6 +43,7 @@ public class HostActivity extends AppCompatActivity implements
     private MenuItem menuTextViewTime;
     private MenuItem menuNeedTimeItem;
     private MenuItem menuSettings;
+    private MenuItem menuAverageTime;
     private SQLiteDatabase database;
     OnHostActivityEventListener hostActivityEventListener;
 
@@ -52,7 +54,7 @@ public class HostActivity extends AppCompatActivity implements
     boolean enableNotification = true;
     private boolean enableSettingButton = true;
 
-    public static final String PATTERN = "yyyy-MM-dd";
+    public static final String DATE_PATTERN = "yyyy-MM-dd";
 
     @Override
     protected void onStop() {
@@ -119,8 +121,10 @@ public class HostActivity extends AppCompatActivity implements
         menuTextViewTime =  menu.findItem(R.id.item_time);
         menuNeedTimeItem = menu.findItem(R.id.item_time_norm);
         menuSettings = menu.findItem(R.id.item_menu_settings);
+        menuAverageTime = menu.findItem(R.id.item_average);
         //hostActivityEventListener.onMenuCreated();
         getSupportLoaderManager().initLoader(MyCursorLoader.MENU_TIME,null, this);
+        getSupportLoaderManager().initLoader(MyCursorLoader.AVERAGE_WORK_TIME_IN_MONTH,null, this);
         //getLoaderManager().initLoader(MyCursorLoader.MENU_TIME,null, this);
         return true;
     }
@@ -137,6 +141,7 @@ public class HostActivity extends AppCompatActivity implements
         menuSettings.setEnabled(enableSettingButton);
 
         getSupportLoaderManager().getLoader(MyCursorLoader.MENU_TIME).forceLoad();
+        getSupportLoaderManager().getLoader(MyCursorLoader.AVERAGE_WORK_TIME_IN_MONTH).forceLoad();
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -145,6 +150,9 @@ public class HostActivity extends AppCompatActivity implements
         int id = item.getItemId();
 
         switch (id){
+            case R.id.item_average:
+                Toast.makeText(this, R.string.hint_time_average, Toast.LENGTH_SHORT).show();
+                break;
             case R.id.item_time:
                 Toast.makeText(this, R.string.hint_time_thisday, Toast.LENGTH_SHORT).show();
                 break;
@@ -191,7 +199,7 @@ public class HostActivity extends AppCompatActivity implements
     @Override
     public void onAddWorkButtonClick(Set<Integer> idWorksToAdd) {
         Date date = new Date();
-        SimpleDateFormat format = new SimpleDateFormat(PATTERN, Locale.getDefault());// HH:mm:ss.SSS");
+        SimpleDateFormat format = new SimpleDateFormat(DATE_PATTERN, Locale.getDefault());// HH:mm:ss.SSS");
         String dateString = format.format(date);
         database.beginTransaction();
         try{
@@ -233,6 +241,7 @@ public class HostActivity extends AppCompatActivity implements
         database.execSQL("DELETE FROM Works WHERE _id="+id);
         hostActivityEventListener.onUpdateData();
         getSupportLoaderManager().getLoader(MyCursorLoader.MENU_TIME).forceLoad();
+        getSupportLoaderManager().getLoader(MyCursorLoader.AVERAGE_WORK_TIME_IN_MONTH).forceLoad();
 
     }
 
@@ -270,6 +279,14 @@ public class HostActivity extends AppCompatActivity implements
             sumTime = time;
             setTextOnMenuItem(time);
         }
+
+        if (loader.getId()==MyCursorLoader.AVERAGE_WORK_TIME_IN_MONTH && data.moveToFirst()){
+            //menuAverageTime.setTitle(String.valueOf(data.getInt(0)));
+            TextView tvmenuAverageTime = findViewById(menuAverageTime.getItemId());
+            if (tvmenuAverageTime!=null)
+                tvmenuAverageTime.setText(String.valueOf(data.getInt(0)));
+        }
+
     }
 
     @Override

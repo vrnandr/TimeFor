@@ -7,6 +7,7 @@
     <string name="time_norm">408</string>
     <string name="delete_row">Удалить</string>
     <string name="hint_time_thisday">Время за сегодня</string>
+    <string name="hint_time_average">Среднее время за месяц</string>
     <string name="hint_time_need">Еще надо минут</string>
     <string name="settings">Настойки</string>
 
