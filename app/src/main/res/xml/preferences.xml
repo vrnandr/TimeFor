@@ -29,20 +29,4 @@
             android:defaultValue="85"
             android:inputType="number"/>
     </PreferenceCategory>
-    <PreferenceCategory
-        android:title="Время в пути"
-        android:key="time_on_road_category">
-        <CheckBoxPreference
-            android:id="@+id/enableTimeOnRoad"
-            android:key="enable_time_on_road"
-            android:title="Учитывать время в пути"
-            android:defaultValue="false"/>
-        <EditTextPreference
-            android:enabled="false"
-            android:id="@+id/timeOnRoad"
-            android:key="time_on_road"
-            android:title="Среднее время в пути, добавлятся при добавлении работ"
-            android:defaultValue="10"
-            android:inputType="number"/>
-    </PreferenceCategory>
 </PreferenceScreen>

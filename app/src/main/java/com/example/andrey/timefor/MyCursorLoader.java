@@ -1,10 +1,10 @@
 package com.example.andrey.timefor;
 
 import android.content.Context;
-import android.os.Bundle;
-import android.support.v4.content.CursorLoader;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Bundle;
+import android.support.v4.content.CursorLoader;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

@@ -16,8 +16,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
     public static final String ENABLE_COLORING = "enable_coloring";
     public static final String TIME_NORM = "time_norm";
     public static final String NEED_TIME_PERCENTAGE = "need_time_percentage";
-    public static final String ENABLE_TIME_ON_ROAD = "enable_time_on_road";
-    public static final String TIME_ON_ROAD = "time_on_road";
 
     interface OnSettingsFragmentEventListener{
         void onStopSettingsFragment();
@@ -51,8 +49,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
     private void updateSummary() {
         findPreference(TIME_NORM).setSummary(getPreferenceScreen().getSharedPreferences().getString(TIME_NORM,""));
         findPreference(NEED_TIME_PERCENTAGE).setSummary(getPreferenceScreen().getSharedPreferences().getString(NEED_TIME_PERCENTAGE,""));
-        findPreference(TIME_ON_ROAD).setSummary(getPreferenceScreen().getSharedPreferences().getString(TIME_ON_ROAD,""));
-        findPreference(TIME_ON_ROAD).setEnabled(getPreferenceScreen().getSharedPreferences().getBoolean(ENABLE_TIME_ON_ROAD, false));
     }
 
     @Override
@@ -67,7 +63,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (key.equals(TIME_NORM)||key.equals(NEED_TIME_PERCENTAGE)||key.equals(TIME_ON_ROAD)||key.equals(ENABLE_TIME_ON_ROAD))
+        if (key.equals(TIME_NORM)||key.equals(NEED_TIME_PERCENTAGE))
             updateSummary();
         if (key.equals(ENABLE_COLORING)||key.equals(TIME_NORM)||key.equals(NEED_TIME_PERCENTAGE))
             if(getActivity()!=null)

@@ -4,6 +4,7 @@ package com.example.andrey.timefor;
 //todo считать среднее за месяц
 //todo поменять пакет и залить на гитхаб
 //todo изменить вывод даты в листью к виду гггг.мм.дд
+//todo при лонгклике на группе не должно открываться меню
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -24,9 +25,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 import android.widget.TextView;
-
+import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

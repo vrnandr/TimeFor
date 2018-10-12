@@ -1,15 +1,14 @@
 package com.example.andrey.timefor;
 
+import android.content.Context;
+import android.database.SQLException;
+import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 /**
  * Created by vrnandr on 27.08.18.
  */
-
-import android.content.Context;
-import android.database.SQLException;
-import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 
 
 public class DBHelper extends SQLiteOpenHelper {
