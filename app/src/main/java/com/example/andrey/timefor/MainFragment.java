@@ -17,6 +17,7 @@ import android.widget.AbsListView;
 import android.widget.ExpandableListView;
 import android.widget.ListView;
 import android.widget.SimpleCursorTreeAdapter;
+import android.widget.TextView;
 
 /**
  * Created by vrnandr on 26.08.18.
@@ -64,10 +65,10 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
         adapter = new SimpleCursorTreeAdapter(
                 getActivity(),
                 null,
-
-                R.layout.main_fragment_listview_group_item,
-                new String[] {"date","sum"},
-                new int[] {R.id.group_item_date,R.id.group_item_sum},
+                // вывод группы переопределен в getGroupView
+                0,
+                null,
+                null,
 
                 R.layout.main_fragment_listview_child_item,
                 new String[]{"work", "time"},
@@ -76,7 +77,7 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
             @Override
             protected Cursor getChildrenCursor(Cursor groupCursor) {
                 int id = groupCursor.getPosition();
-                CharSequence date = groupCursor.getString(1);
+                CharSequence date = groupCursor.getString(groupCursor.getColumnIndex("date"));
                 Bundle bundle = new Bundle();
                 bundle.putCharSequence(KEY, date);
                 Loader<Cursor> myCursorLoader = getLoaderManager().getLoader(id);
@@ -87,11 +88,38 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
                 return null;
             }
 
+            // для лучшего вида даты в списке (дд.мм.гггг)
+            @Override
+            public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
+
+                if (convertView == null)
+                    convertView = getLayoutInflater().inflate(R.layout.main_fragment_listview_group_item, parent, false);
+
+                TextView tvDate = convertView.findViewById(R.id.group_item_date);
+                TextView tvTime = convertView.findViewById(R.id.group_item_sum);
+                // берем дату с базы в формате гггг-мм-дд
+                String date = getGroup(groupPosition).getString(getGroup(groupPosition).getColumnIndex("date"));
+                //конвертируем ее к виду дд.мм.гггг
+                String fDate = date.substring(8,10)+"."+date.substring(5,7)+"."+date.substring(0,4);
+                tvDate.setText(fDate);
+                tvTime.setText(getGroup(groupPosition).getString(getGroup(groupPosition).getColumnIndex("sum")));
+
+
+                return convertView;
+            }
         };
 
         ExpandableListView expandableListView = v.findViewById(R.id.main_fragment_listview);
         expandableListView.setAdapter(adapter);
         expandableListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+        expandableListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+            @Override
+            public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+                //parent.setItemChecked(childPosition, true);
+                Log.d(TAG, "onChildClick: "+id);
+                return true;
+            }
+        });
         expandableListView.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
             int id=0;
 
@@ -128,6 +156,8 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
             public void onItemCheckedStateChanged(android.view.ActionMode mode, int position, long i, boolean checked) {
                 id = ExpandableListView.getPackedPositionChild(i);
             }
+
+
         });
 
         getLoaderManager().initLoader(MyCursorLoader.DAYS,null,this);
