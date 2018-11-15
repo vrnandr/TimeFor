@@ -13,9 +13,10 @@ import android.util.Log;
 
 public class DBHelper extends SQLiteOpenHelper {
 
-    private static final int DB_VERSION = 11;
+    private static final int DB_VERSION = 12;
     //10 версия коневертирование 30.10.2010 в 2010.10.30
     //11 версия конвертирование 2010.10.30 в 2010-10-30 формат даты sqlite
+    //12 версия добавление услуги 26-01
 
 
     private static final String DB_NAME = "works.db";
@@ -251,9 +252,16 @@ public class DBHelper extends SQLiteOpenHelper {
             db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-23-02 РЕМОНТ ПЕРИФЕРИЙНЫХ УСТРОЙСТВ (КТО-2)','Крупно-узловая поблочная замена компонентов ПУ',60)");
             db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-23-02 РЕМОНТ ПЕРИФЕРИЙНЫХ УСТРОЙСТВ (КТО-2)','Подготовка технического заключения',30)");
             db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-23-02 РЕМОНТ ПЕРИФЕРИЙНЫХ УСТРОЙСТВ (КТО-2)','Прием и диагностика ПУ в СЦ ОСК',45)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-26-01 ВНУТРЕННИЕ РАБОТЫ','1 час - Выполнение работ по поручению руководителя',60)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-26-01 ВНУТРЕННИЕ РАБОТЫ','2 часа - Выполнение работ по поручению руководителя',120)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-26-01 ВНУТРЕННИЕ РАБОТЫ','3 часа - Выполнение работ по поручению руководителя',180)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-26-01 ВНУТРЕННИЕ РАБОТЫ','4 часа - Выполнение работ по поручению руководителя',240)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-26-01 ВНУТРЕННИЕ РАБОТЫ','5 часов - Выполнение работ по поручению руководителя',300)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-26-01 ВНУТРЕННИЕ РАБОТЫ','6 часов - Выполнение работ по поручению руководителя',360)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-26-01 ВНУТРЕННИЕ РАБОТЫ','7 часов - Выполнение работ по поручению руководителя',420)");
+            db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-26-01 ВНУТРЕННИЕ РАБОТЫ','8 часов - Выполнение работ по поручению руководителя',480)");
+
             db.setTransactionSuccessful();
-        } catch (SQLException e) {
-            Log.d("My", "onCreate: " + e.getLocalizedMessage());
         } finally {
             db.endTransaction();
         }
@@ -267,6 +275,24 @@ public class DBHelper extends SQLiteOpenHelper {
             db.execSQL("UPDATE Works SET Date = substr(Date, 7, 4) || '.' || substr(Date, 4,2) || '.' || substr(Date, 1,2)");
         if (oldVersion == 10 && newVersion == 11)
             db.execSQL("UPDATE Works SET Date = substr(Date, 1, 4) || '-' || substr(Date, 6,2) || '-' || substr(Date, 9,2)");
+        if (newVersion==12){
+            db.beginTransaction();{
+                try{
+                    db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-26-01 ВНУТРЕННИЕ РАБОТЫ','1 час - Выполнение работ по поручению руководителя',60)");
+                    db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-26-01 ВНУТРЕННИЕ РАБОТЫ','2 часа - Выполнение работ по поручению руководителя',120)");
+                    db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-26-01 ВНУТРЕННИЕ РАБОТЫ','3 часа - Выполнение работ по поручению руководителя',180)");
+                    db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-26-01 ВНУТРЕННИЕ РАБОТЫ','4 часа - Выполнение работ по поручению руководителя',240)");
+                    db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-26-01 ВНУТРЕННИЕ РАБОТЫ','5 часов - Выполнение работ по поручению руководителя',300)");
+                    db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-26-01 ВНУТРЕННИЕ РАБОТЫ','6 часов - Выполнение работ по поручению руководителя',360)");
+                    db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-26-01 ВНУТРЕННИЕ РАБОТЫ','7 часов - Выполнение работ по поручению руководителя',420)");
+                    db.execSQL("INSERT INTO ServiceCatalog(Service,ShortDesc,TimeNorm) VALUES ('ОСК-26-01 ВНУТРЕННИЕ РАБОТЫ','8 часов - Выполнение работ по поручению руководителя',480)");
+                    db.setTransactionSuccessful();
+                } finally {
+                  db.endTransaction();
+                }
+            }
+       }
+
 
     }
 }

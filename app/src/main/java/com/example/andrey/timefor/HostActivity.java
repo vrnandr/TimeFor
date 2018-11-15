@@ -233,7 +233,7 @@ public class HostActivity extends AppCompatActivity implements
 
     //колбек с майн фрагмента для удаления работы и последующим обновлением данных во фрагменте.
     @Override
-    public void onChildItemClick(int id) {
+    public void onChildItemClick(long id) {
         database.execSQL("DELETE FROM Works WHERE _id="+id);
         hostActivityEventListener.onUpdateData();
         getSupportLoaderManager().getLoader(MyCursorLoader.MENU_TIME).forceLoad();

@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.view.ActionMode;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -19,6 +20,9 @@ import android.widget.ListView;
 import android.widget.SimpleCursorTreeAdapter;
 import android.widget.TextView;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Created by vrnandr on 26.08.18.
  */
@@ -27,6 +31,13 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
     public final static String KEY = "date";
 
     private final static String TAG = "My";
+
+    private long mId;
+    private int index;
+    private ActionMode mActionMode;
+    private ExpandableListView expandableListView;
+
+    private Set<Long> checkedIds;
 
     SimpleCursorTreeAdapter adapter;
 
@@ -37,7 +48,7 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
 
     public interface OnMainFragmentEventListener {
         void onFABClick();
-        void onChildItemClick(int id);
+        void onChildItemClick(long id);
     }
 
     OnMainFragmentEventListener eventListener;
@@ -109,17 +120,43 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
             }
         };
 
-        ExpandableListView expandableListView = v.findViewById(R.id.main_fragment_listview);
+        expandableListView = v.findViewById(R.id.main_fragment_listview);
         expandableListView.setAdapter(adapter);
-        expandableListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+
+        //expandableListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+        expandableListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         expandableListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
-                //parent.setItemChecked(childPosition, true);
-                Log.d(TAG, "onChildClick: "+id);
+                mId = id;
+                index = parent.getFlatListPosition(ExpandableListView.getPackedPositionForChild(groupPosition, childPosition));
+                boolean checked = parent.isItemChecked(index);
+                if (checked) {
+                    if (mActionMode!=null)
+                        mActionMode.finish();
+                    parent.setItemChecked(index, false);
+                    return true;
+                }
+                parent.setItemChecked(index, true);
+                Log.d(TAG, "onChildClick: "+mId);
+                if (mActionMode!=null)
+                    return true;
+
+                mActionMode = getActivity().startActionMode(actionModeCallback);
+                //checkedIds = new HashSet<>();
+
+
                 return true;
             }
         });
+        expandableListView.setOnGroupCollapseListener(new ExpandableListView.OnGroupCollapseListener() {
+            @Override
+            public void onGroupCollapse(int groupPosition) {
+                if (mActionMode!=null)
+                    mActionMode.finish();
+            }
+        });
+        /*expandableListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
         expandableListView.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
             int id=0;
 
@@ -158,12 +195,45 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
             }
 
 
-        });
+        });*/
 
         getLoaderManager().initLoader(MyCursorLoader.DAYS,null,this);
 
         return v;
     }
+
+    private ActionMode.Callback actionModeCallback = new ActionMode.Callback() {
+        @Override
+        public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
+            MenuInflater inflater = actionMode.getMenuInflater();
+            inflater.inflate(R.menu.main_fragment_contex_menu, menu);
+            return true;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
+            return false;
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
+            switch (menuItem.getItemId()){
+                case R.id.item_menu_delete:
+                    eventListener.onChildItemClick(mId);
+                    actionMode.finish();
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode actionMode) {
+            expandableListView.setItemChecked(index, false);
+            mActionMode = null;
+        }
+    };
+
 
     @Override
     public void onResume() {
